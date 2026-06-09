@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forecastly</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<style>
+  section, .navbar, .footer {
+    width: min(calc(100% - 48px), 1240px);
+    margin: 0 auto;
+  }
+
+  .navbar {
+    position: sticky;
+    top: 18px;
+    z-index: 1000;
+    margin-top: 18px;
+    padding: 18px 26px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(18px);
+    border-radius: 22px;
+    box-shadow: 0 10px 30px rgba(20,24,38,0.06);
+  }
+
+  .logo-wrap {
+    width: 220px;
+    height: 56px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+  }
+
+  .logo-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.9);
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 28px;
+  }
+
+  .nav-links a {
+    color: #556074;
+    font-weight: 600;
+  }
+
+  .nav-links a:hover {
+    color: #111827;
+  }
+
+  .nav-btn {
+    min-height: 46px;
+    padding: 0 22px;
+    border-radius: 999px;
+    background: #111827;
+    color: white;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .menu-toggle {
+    display: none;
+  }
+
+  .hero {
+    position: relative;
+    min-height: calc(100vh - 150px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .hero-bg {
+    position: absolute;
+    width: 760px;
+    height: 760px;
+    background: radial-gradient(circle, rgba(168,85,247,.45), rgba(236,72,153,.20), transparent 70%);
+    filter: blur(100px);
+    z-index: 0;
+  }
+
+  .hero-text {
+    position: relative;
+    z-index: 2;
+    max-width: 850px;
+  }
+
+  .badge, .section-tag, .featured-badge {
+    display: inline-flex;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(109,74,255,.10);
+    color: #6d4aff;
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .hero h1 {
+    margin: 18px 0;
+    font-size: clamp(46px, 7vw, 78px);
+    line-height: .98;
+    letter-spacing: -0.06em;
+  }
+
+  .hero p {
+    max-width: 680px;
+    margin: 0 auto 30px;
+    color: #647089;
+    font-size: 18px;
+  }
+
+  .hero-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+  }
+
+  .about-us, .how-to-use, .marketplaces, .pricing, .ready-section, .contact-section {
+    padding: 90px 0;
+  }
+
+  .section-top, .section-heading {
+    max-width: 760px;
+    margin: 0 auto 48px;
+    text-align: center;
+  }
+
+  .left-align {
+    margin-left: 0;
+    text-align: left;
+  }
+
+  .narrow {
+    max-width: 650px;
+  }
+
+  .section-top h2, .section-heading h2, .ready-content h2 {
+    margin: 14px 0;
+    font-size: clamp(32px, 5vw, 52px);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+  }
+
+  .section-top p, .section-heading p, .about-card p, .market-card p, .price-desc, .contact-info p, .ready-content p {
+    color: #647089;
+  }
+
+  .about-grid, .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .about-card, .slider-card, .market-card, .price-card, .contact-info, .contact-form, .ready-box {
+    background: rgba(255,255,255,.84);
+    border: 1px solid rgba(255,255,255,.78);
+    border-radius: 24px;
+    box-shadow: 0 12px 32px rgba(20,24,38,.06);
+  }
+
+  .about-card {
+    padding: 28px;
+  }
+
+  .about-card.highlight {
+    background: linear-gradient(180deg, rgba(109,74,255,.08), rgba(255,255,255,.88));
+  }
+
+  .about-card h3, .market-card h3, .price-card h3 {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+
+  .slider-shell {
+    display: grid;
+    grid-template-columns: auto minmax(0, 820px) auto;
+    gap: 18px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .slider-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 1px solid rgba(20,24,38,.08);
+    background: white;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: 0 12px 32px rgba(20,24,38,.06);
+  }
+
+  .slider-card {
+    overflow: hidden;
+    min-height: 320px;
+  }
+
+  .slide {
+    display: none;
+    padding: 54px 48px;
+    text-align: center;
+  }
+
+  .slide.active {
+    display: block;
+  }
+
+  .slide-number {
+    width: 72px;
+    height: 72px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 22px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, #6d4aff, #ec4899);
+    color: white;
+    font-size: 24px;
+    font-weight: 900;
+  }
+
+  .slide p {
+    color: #647089;
+    max-width: 580px;
+    margin: 0 auto;
+  }
+
+  .slider-dots {
+    margin-top: 24px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(109,74,255,.2);
+    cursor: pointer;
+  }
+
+  .active-dot {
+    width: 28px;
+    background: #6d4aff;
+  }
+
+  .marketplace-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+
+  .market-card {
+    padding: 28px 22px;
+    text-align: center;
+    background: white;
+    transition: .25s;
+  }
+
+  .market-card:hover, .price-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .market-image-wrap {
+    width: 78px;
+    height: 78px;
+    margin: 0 auto 18px;
+    border-radius: 20px;
+    background: #f8f8f8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
+  }
+
+  .market-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .price-card {
+    padding: 32px 30px;
+    background: white;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .price-card.featured {
+    transform: translateY(-8px);
+    border: 1px solid rgba(109,74,255,.18);
+    box-shadow: 0 20px 45px rgba(109,74,255,.10);
+  }
+
+  .price {
+    font-size: 50px;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    margin: 12px 0;
+  }
+
+  .price span {
+    font-size: 15px;
+    color: #64748b;
+  }
+
+  .price-card ul {
+    margin: 22px 0;
+    padding-top: 22px;
+    border-top: 1px solid rgba(17,24,39,.06);
+  }
+
+  .price-card li {
+    margin-bottom: 12px;
+    color: #475569;
+  }
+
+  .full-btn {
+    margin-top: auto;
+    width: 100%;
+  }
+
+  .ready-box {
+    padding: 34px;
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    align-items: center;
+  }
+
+  .ready-link {
+    padding: 16px 22px;
+    border-radius: 16px;
+    background: white;
+    border: 1px solid rgba(20,24,38,.08);
+    font-weight: 800;
+  }
+
+  .contact-wrapper {
+    display: grid;
+    grid-template-columns: .9fr 1.1fr;
+    gap: 28px;
+  }
+
+  .contact-info, .contact-form {
+    padding: 28px;
+    background: white;
+  }
+
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .contact-form input, .contact-form textarea {
+    width: 100%;
+    border: 1px solid rgba(17,24,39,.08);
+    border-radius: 16px;
+    padding: 16px;
+    background: #fafafa;
+    outline: none;
+  }
+
+  .contact-form textarea {
+    min-height: 160px;
+  }
+
+  .footer {
+    padding: 18px 0 52px;
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    flex-wrap: wrap;
+    border-top: 1px solid rgba(20,24,38,.06);
+  }
+
+  .footer-logo-image {
+    width: 180px;
+    height: 50px;
+    object-fit: cover;
+    transform: scale(2.6);
+    transform-origin: left center;
+  }
+
+  .footer-right, .footer-mini-links, .footer-socials {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .footer-socials a {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(109,74,255,.08);
+    color: #6d4aff;
+  }
+
+  @media (max-width: 900px) {
+    .menu-toggle {
+      display: flex;
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      border: 1px solid rgba(20,24,38,.08);
+      background: white;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .menu-toggle span {
+      width: 18px;
+      height: 2px;
+      background: #111827;
+    }
+
+    .nav-links {
+      display: none;
+      width: 100%;
+      flex-direction: column;
+      padding-top: 14px;
+    }
+
+    .nav-links.open {
+      display: flex;
+    }
+
+    .nav-btn {
+      display: none;
+    }
+
+    .navbar {
+      flex-wrap: wrap;
+    }
+
+    .about-grid, .marketplace-grid, .pricing-grid, .contact-wrapper {
+      grid-template-columns: 1fr;
+    }
+
+    .slider-shell {
+      grid-template-columns: 1fr;
+    }
+
+    .slider-btn {
+      display: none;
+    }
+
+    .ready-box {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>
+<body>
+
+    <header class="navbar">
+       <a href="#" class="logo-wrap" aria-label="Forecastly home">
+    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Forecastly logo" class="logo-image">
+</a>
+
+        <button class="menu-toggle" aria-label="Open menu" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <nav class="nav-links" id="navMenu">
+            <a href="#about">About</a>
+            <a href="#how-to-use">How it works</a>
+            <a href="#marketplaces">Marketplaces</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#contact">Contact</a>
+        </nav>
+
+        <a href="/login" class="nav-btn">Log in</a>
+    </header>
+    
+    <main>
+        <section class="hero">
+            <div class="hero-bg"></div>
+
+            <div class="hero-text">
+                <span class="badge">AI forecasting for marketplace sellers</span>
+                <h1>Forecast sales with less guesswork</h1>
+                <p>
+                    Forecastly helps sellers understand demand, plan stock, and make
+                    better decisions across Kaspi Shop, Halyk Market, Ozon, and Wildberries.
+                </p>
+
+                <div class="hero-buttons">
+                    <a href="#pricing" class="btn primary">Get started</a>
+                    <a href="#about" class="btn secondary">Learn more</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="about-us" id="about">
+            <div class="section-heading left-align">
+                <span class="section-tag">About Forecastly</span>
+                <h2>Built for sellers who need clarity, not complexity</h2>
+                <p>
+                    Forecastly turns raw sales data into simple forecasts and useful insights,
+                    helping marketplace sellers plan smarter without spending hours in spreadsheets.
+                </p>
+            </div>
+
+            <div class="about-grid">
+                <div class="about-card highlight">
+                    <h3>Simple by design</h3>
+                    <p>Clean dashboards and clear outputs that are easy to understand at a glance.</p>
+                </div>
+                <div class="about-card">
+                    <h3>Made for growth</h3>
+                    <p>Support better inventory, pricing, and promotion decisions as your store scales.</p>
+                </div>
+                <div class="about-card">
+                    <h3>Focused on marketplaces</h3>
+                    <p>Designed around the needs of sellers working across local and regional platforms.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="how-to-use" id="how-to-use">
+            <div class="section-top narrow">
+                <span class="section-tag">How it works</span>
+                <h2>Start in 3 simple steps</h2>
+                <p>Switch between steps to see how sellers use Forecastly.</p>
+            </div>
+
+            <div class="slider-shell">
+                <button class="slider-btn" onclick="prevSlide()" aria-label="Previous slide">&#10094;</button>
+
+                <div class="slider-card">
+                    <div class="slide active">
+                        <div class="slide-number">01</div>
+                        <h3>Upload your sales data</h3>
+                        <p>
+                            Add your CSV or Excel file to import historical marketplace performance
+                            and prepare it for analysis.
+                        </p>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-number">02</div>
+                        <h3>Choose forecast settings</h3>
+                        <p>
+                            Select time period, forecast horizon, and analysis preferences based on
+                            your products and business goals.
+                        </p>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-number">03</div>
+                        <h3>Review insights and act</h3>
+                        <p>
+                            Explore forecast results, detect unusual changes, and plan stock or pricing
+                            with more confidence.
+                        </p>
+                    </div>
+                </div>
+
+                <button class="slider-btn" onclick="nextSlide()" aria-label="Next slide">&#10095;</button>
+            </div>
+
+            <div class="slider-dots">
+                <span class="dot active-dot" onclick="goToSlide(0)"></span>
+                <span class="dot" onclick="goToSlide(1)"></span>
+                <span class="dot" onclick="goToSlide(2)"></span>
+            </div>
+        </section>
+
+       <section class="marketplaces" id="marketplaces">
+    <div class="section-top">
+        <span class="section-tag">Marketplace support</span>
+        <h2>Work with the platforms that matter to your business</h2>
+        <p>Forecastly is tailored for sellers across the marketplaces below.</p>
+    </div>
+
+    <div class="marketplace-grid">
+        <article class="market-card">
+            <div class="market-image-wrap">
+                <img src="{{ url_for('static', filename='images/kaspi.png') }}" alt="Kaspi Shop logo" class="market-image">
+            </div>
+            <h3>Kaspi Shop</h3>
+            <p>Forecast demand and monitor product trends for one of the biggest marketplaces in Kazakhstan.</p>
+        </article>
+
+        <article class="market-card">
+            <div class="market-image-wrap">
+                <img src="{{ url_for('static', filename='images/halyk.png') }}" alt="Halyk Market logo" class="market-image">
+            </div>
+            <h3>Halyk Market</h3>
+            <p>Analyze sales patterns and plan stock levels with clearer, more structured data insights.</p>
+        </article>
+
+        <article class="market-card">
+            <div class="market-image-wrap">
+                <img src="{{ url_for('static', filename='images/ozon.png') }}" alt="Ozon logo" class="market-image">
+            </div>
+            <h3>Ozon</h3>
+            <p>Track demand shifts and prepare inventory for seasonal changes and promotion periods.</p>
+        </article>
+
+        <article class="market-card">
+            <div class="market-image-wrap">
+                <img src="{{ url_for('static', filename='images/wildberries.png') }}" alt="Wildberries logo" class="market-image">
+            </div>
+            <h3>Wildberries</h3>
+            <p>Use forecasts and anomaly detection to respond faster to changes in product performance.</p>
+        </article>
+    </div>
+</section>
+
+        <section class="pricing" id="pricing">
+            <div class="section-top">
+                <span class="section-tag">Pricing</span>
+                <h2>Simple plans for different business stages</h2>
+                <p>Choose the option that fits your store today and upgrade as you grow.</p>
+            </div>
+
+            <div class="pricing-grid">
+                <div class="price-card">
+                    <h3>Basic</h3>
+                    <div class="price">$9<span>/month</span></div>
+                    <p class="price-desc">For new and small sellers</p>
+                    <ul>
+                        <li>Sales data upload</li>
+                        <li>Basic forecasting</li>
+                        <li>Core analytics</li>
+                    </ul>
+                    <a href="#contact" class="btn secondary full-btn">Choose Basic</a>
+                </div>
+
+                <div class="price-card featured">
+                    <div class="featured-badge">Most popular</div>
+                    <h3>Pro</h3>
+                    <div class="price">$19<span>/month</span></div>
+                    <p class="price-desc">For growing marketplace stores</p>
+                    <ul>
+                        <li>Advanced forecasting</li>
+                        <li>Anomaly detection</li>
+                        <li>Actionable recommendations</li>
+                        <li>Report history</li>
+                    </ul>
+                    <a href="#contact" class="btn primary full-btn">Choose Pro</a>
+                </div>
+
+                <div class="price-card">
+                    <h3>Enterprise</h3>
+                    <div class="price">$39<span>/month</span></div>
+                    <p class="price-desc">For teams and larger operations</p>
+                    <ul>
+                        <li>Full analytics access</li>
+                        <li>Priority support</li>
+                        <li>Extended storage</li>
+                        <li>Multi-user access</li>
+                    </ul>
+                    <a href="#contact" class="btn secondary full-btn">Choose Enterprise</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="ready-section">
+            <div class="ready-box">
+                <div class="ready-content">
+                    <span class="section-tag">Ready to forecast?</span>
+                    <h2>Plan your next sales move with more confidence</h2>
+                    <p>Turn marketplace data into clearer actions with a simple AI-powered workflow.</p>
+                </div>
+                <a href="#contact" class="ready-link">Start now <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+        </section>
+
+        <section class="contact-section" id="contact">
+            <div class="section-top narrow">
+                <span class="section-tag">Contact us</span>
+                <h2>Let’s talk about your business needs</h2>
+                <p>Have questions about Forecastly? Send us a message and we’ll get back to you.</p>
+            </div>
+
+            <div class="contact-wrapper">
+                <div class="contact-info">
+                    <h3>Get in touch</h3>
+                    <p><strong>Email:</strong> hello@forecastly.ai</p>
+                    <p><strong>Phone:</strong> +7 (700) 123 45 67</p>
+                    <p><strong>Location:</strong> Almaty, Kazakhstan</p>
+                </div>
+
+                <form class="contact-form">
+                    <input type="text" placeholder="Your name">
+                    <input type="email" placeholder="Your email">
+                    <textarea placeholder="Tell us a bit about your business"></textarea>
+                    <button type="submit" class="btn primary">Send message</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-brand">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" 
+     alt="Forecastly logo" 
+     class="footer-logo-image">
+            <p>AI forecasting platform for marketplace sellers.</p>
+            <p class="made">Made with love in Kazakhstan</p>
+        </div>
+
+        <div class="footer-right">
+            <div class="footer-mini-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+            </div>
+
+            <div class="footer-socials">
+                <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#" aria-label="Telegram"><i class="fa-brands fa-telegram"></i></a>
+                <a href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const dots = document.querySelectorAll('.dot');
+        const navMenu = document.getElementById('navMenu');
+
+        function showSlide(index) {
+            slides.forEach((slide) => slide.classList.remove('active'));
+            dots.forEach((dot) => dot.classList.remove('active-dot'));
+
+            slides[index].classList.add('active');
+            dots[index].classList.add('active-dot');
+        }
+
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % slides.length;
+            showSlide(currentSlide);
+        }
+
+        function prevSlide() {
+            currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+            showSlide(currentSlide);
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            showSlide(currentSlide);
+        }
+
+        function toggleMenu() {
+            navMenu.classList.toggle('open');
+        }
+
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => navMenu.classList.remove('open'));
+        });
+    </script>
+
+</body>
+</html>

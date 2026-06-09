@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forecastly | Sign up</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<style>
+    .signup-page {
+      min-height: 100vh;
+      background: #f5f3fb;
+      font-family: 'Inter', sans-serif;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .signup-bg {
+      position: fixed;
+      top: 45%;
+      left: 50%;
+      width: 760px;
+      height: 760px;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(168,85,247,.22), rgba(236,72,153,.12), transparent 76%);
+      filter: blur(110px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .signup-layout {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .signup-card {
+      width: 100%;
+      max-width: 500px;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(17,24,39,.05);
+      border-radius: 32px;
+      padding: 34px;
+      box-shadow: 0 20px 60px rgba(15,23,42,.08);
+    }
+
+    .signup-logo-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 26px;
+    }
+
+    .signup-logo {
+      height: 60px;
+      transform: scale(6.2);
+      transform-origin: center;
+    }
+
+    .signup-header {
+      margin-bottom: 24px;
+    }
+
+    .signup-badge {
+      display: inline-flex;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(109,74,255,.10);
+      color: #6d4aff;
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 14px;
+    }
+
+    .signup-header h1 {
+      font-size: 34px;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: #0f172a;
+      margin-bottom: 10px;
+    }
+
+    .signup-header p {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #64748b;
+    }
+
+    .signup-form {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 14px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .form-group input {
+      height: 56px;
+      border-radius: 18px;
+      border: 1px solid rgba(17,24,39,.08);
+      padding: 0 16px;
+      font-size: 15px;
+      background: #fff;
+      color: #111827;
+      outline: none;
+      transition: .25s ease;
+    }
+
+    .form-group input:focus {
+      border-color: rgba(109,74,255,.4);
+      box-shadow: 0 0 0 4px rgba(109,74,255,.08);
+    }
+
+    .password-wrap {
+      position: relative;
+    }
+
+    .password-wrap input {
+      width: 100%;
+      padding-right: 52px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      top: 50%;
+      right: 14px;
+      transform: translateY(-50%);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 18px;
+      color: #64748b;
+    }
+
+    .password-message {
+      margin-top: 8px;
+      font-size: 13px;
+      min-height: 18px;
+    }
+
+    .success-text {
+      color: #16a34a;
+    }
+
+    .error-text {
+      color: #dc2626;
+    }
+
+    .input-success {
+      border-color: rgba(22,163,74,.45) !important;
+      box-shadow: 0 0 0 4px rgba(22,163,74,.08) !important;
+    }
+
+    .input-error {
+      border-color: rgba(220,38,38,.45) !important;
+      box-shadow: 0 0 0 4px rgba(220,38,38,.08) !important;
+    }
+
+    .terms-check {
+      display: flex;
+      gap: 10px;
+      font-size: 14px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    .terms-check input {
+      margin-top: 3px;
+      accent-color: #6d4aff;
+    }
+
+    .terms-check a {
+      color: #6d4aff;
+      font-weight: 700;
+    }
+
+    .signup-btn {
+      height: 56px;
+      border-radius: 18px;
+      border: none;
+      background: linear-gradient(90deg, #6d4aff, #ec4899);
+      color: white;
+      font-weight: 800;
+      font-size: 16px;
+      cursor: pointer;
+      transition: .25s ease;
+    }
+
+    .signup-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(109,74,255,.20);
+    }
+
+    .login-text {
+      margin-top: 22px;
+      text-align: center;
+      font-size: 14px;
+      color: #64748b;
+    }
+
+    .login-text a {
+      color: #6d4aff;
+      font-weight: 700;
+    }
+
+    .flash-wrap {
+      margin-bottom: 18px;
+    }
+
+    .flash-message {
+      padding: 14px 16px;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .flash-message.success {
+      background: rgba(34,197,94,.10);
+      color: #15803d;
+      border: 1px solid rgba(34,197,94,.18);
+    }
+
+    .flash-message.error {
+      background: rgba(239,68,68,.10);
+      color: #b91c1c;
+      border: 1px solid rgba(239,68,68,.18);
+    }
+
+    @media (max-width: 560px) {
+      .signup-card {
+        padding: 24px 18px;
+        border-radius: 24px;
+      }
+
+      .signup-logo {
+        height: 50px;
+        transform: scale(6.2);
+      }
+
+      .signup-header h1 {
+        font-size: 28px;
+      }
+    }
+  </style>
+<body class="signup-page">
+
+    <div class="signup-bg"></div>
+
+    <main class="signup-layout">
+        <div class="signup-card">
+            <a href="/" class="signup-logo-wrap" aria-label="Forecastly home">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Forecastly logo" class="signup-logo">
+            </a>
+
+            <div class="signup-header">
+                <span class="signup-badge">Create account</span>
+                <h1>Sign up for Forecastly</h1>
+                <p>Start forecasting smarter and manage your marketplace growth with confidence.</p>
+            </div>
+
+           <form class="signup-form" autocomplete="off" id="signupForm" method="POST">
+    <div class="form-group">
+        <label for="fullname">Full name</label>
+        <input type="text" id="fullname" name="fullname" placeholder="Enter your full name" autocomplete="off">
+    </div>
+
+    <div class="form-group">
+        <label for="signup-email">Email address</label>
+        <input type="email" id="signup-email" name="email" placeholder="Enter your email" autocomplete="off">
+    </div>
+
+    <div class="form-group">
+        <label for="signup-password">Password</label>
+        <div class="password-wrap">
+            <input type="password" id="signup-password" name="password" placeholder="Create a password" autocomplete="new-password">
+            <button type="button" class="toggle-password" data-target="signup-password" aria-label="Show password">
+                <span class="eye-icon">👁</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="confirm-password">Confirm password</label>
+        <div class="password-wrap">
+            <input type="password" id="confirm-password" name="confirm_password" placeholder="Repeat your password" autocomplete="new-password">
+            <button type="button" class="toggle-password" data-target="confirm-password" aria-label="Show password">
+                <span class="eye-icon">👁</span>
+            </button>
+        </div>
+        <p class="password-message" id="passwordMessage"></p>
+    </div>
+
+    <label class="terms-check">
+        <input type="checkbox" name="terms">
+        <span>I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></span>
+    </label>
+
+    <button type="submit" class="signup-btn">Create account</button>
+</form>
+            <p class="login-text">
+                Already have an account? <a href="/login">Log in</a>
+            </p>
+        </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-wrap">
+      {% for category, message in messages %}
+        <div class="flash-message {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+    </main>
+<script>
+    const toggleButtons = document.querySelectorAll('.toggle-password');
+    const passwordInput = document.getElementById('signup-password');
+    const confirmInput = document.getElementById('confirm-password');
+    const passwordMessage = document.getElementById('passwordMessage');
+    const signupForm = document.getElementById('signupForm');
+
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const targetId = button.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.setAttribute('aria-label', 'Hide password');
+            } else {
+                input.type = 'password';
+                button.setAttribute('aria-label', 'Show password');
+            }
+        });
+    });
+
+    function checkPasswords() {
+        const password = passwordInput.value.trim();
+        const confirmPassword = confirmInput.value.trim();
+
+        if (!confirmPassword) {
+            passwordMessage.textContent = '';
+            confirmInput.classList.remove('input-error', 'input-success');
+            return false;
+        }
+
+        if (password === confirmPassword) {
+            passwordMessage.textContent = 'Passwords match';
+            passwordMessage.classList.remove('error-text');
+            passwordMessage.classList.add('success-text');
+            confirmInput.classList.remove('input-error');
+            confirmInput.classList.add('input-success');
+            return true;
+        } else {
+            passwordMessage.textContent = 'Passwords do not match';
+            passwordMessage.classList.remove('success-text');
+            passwordMessage.classList.add('error-text');
+            confirmInput.classList.remove('input-success');
+            confirmInput.classList.add('input-error');
+            return false;
+        }
+    }
+
+    confirmInput.addEventListener('input', checkPasswords);
+    passwordInput.addEventListener('input', checkPasswords);
+
+    signupForm.addEventListener('submit', function(e) {
+        if (!checkPasswords()) {
+            e.preventDefault();
+        }
+    });
+</script>
+</body>
+</html>

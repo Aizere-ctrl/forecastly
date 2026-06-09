@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Forecastly | Dashboard</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  <style>
+    .dashboard-summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .summary-card,
+    .panel {
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid rgba(124, 58, 237, 0.13);
+      box-shadow: 0 20px 50px rgba(124, 58, 237, 0.08);
+      border-radius: 26px;
+    }
+
+    .summary-card {
+      padding: 24px;
+    }
+
+    .metric-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: #f5efff;
+      position: relative;
+      margin-bottom: 18px;
+    }
+
+    .metric-icon::after {
+      content: "";
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 6px;
+      top: 13px;
+      left: 13px;
+      background: linear-gradient(135deg, #7c3aed, #ec4899);
+    }
+
+    .metric-icon.blue::after {
+      background: linear-gradient(135deg, #2563eb, #06b6d4);
+    }
+
+    .metric-icon.green::after {
+      background: linear-gradient(135deg, #059669, #22c55e);
+    }
+
+    .metric-icon.dark::after {
+      background: linear-gradient(135deg, #111827, #7c3aed);
+    }
+
+    .summary-card p {
+      color: #667085;
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .summary-card h2 {
+      font-size: 28px;
+      color: #25113f;
+    }
+
+    .summary-card small {
+      display: block;
+      margin-top: 8px;
+      color: #7c3aed;
+      font-weight: 700;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 0.9fr;
+      gap: 24px;
+    }
+
+    .panel {
+      padding: 26px;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 22px;
+    }
+
+    .panel-head h2,
+    .panel h2 {
+      font-size: 22px;
+      margin-bottom: 6px;
+      color: #25113f;
+    }
+
+    .panel-head p {
+      color: #667085;
+    }
+
+    .forecast-preview {
+      height: 260px;
+      border-radius: 24px;
+      background:
+        linear-gradient(180deg, rgba(124,58,237,.08), rgba(236,72,153,.03)),
+        repeating-linear-gradient(
+          to right,
+          transparent,
+          transparent 54px,
+          rgba(124,58,237,.07) 55px
+        );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #7c3aed;
+      font-weight: 850;
+      text-align: center;
+      padding: 24px;
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .quick-action {
+      text-decoration: none;
+      padding: 16px;
+      border-radius: 18px;
+      background: #faf5ff;
+      border: 1px solid rgba(124, 58, 237, 0.12);
+      color: #25113f;
+      font-weight: 800;
+      transition: .25s;
+    }
+
+    .quick-action:hover {
+      transform: translateY(-3px);
+      background: #f5efff;
+    }
+
+    .right-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .activity-item,
+    .file-item {
+      display: flex;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(124, 58, 237, 0.1);
+    }
+
+    .activity-item:last-child,
+    .file-item:last-child {
+      border-bottom: none;
+    }
+
+    .status-dot {
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      background: #f5efff;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .status-dot::after {
+      content: "";
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #7c3aed;
+    }
+
+    .status-dot.success::after {
+      background: #12b76a;
+    }
+
+    .status-dot.info::after {
+      background: #2563eb;
+    }
+
+    .status-dot.file::after {
+      border-radius: 4px;
+      background: #7c3aed;
+    }
+
+    .activity-item h4,
+    .file-item h4 {
+      margin-bottom: 4px;
+      color: #25113f;
+    }
+
+    .activity-item p,
+    .file-item p,
+    .insight-card p {
+      color: #667085;
+      font-size: 14px;
+    }
+
+    .insight-card {
+      padding: 18px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #faf5ff, #fdf2f8);
+      border: 1px solid rgba(236, 72, 153, 0.14);
+    }
+
+    .insight-card h3 {
+      margin-bottom: 8px;
+      color: #25113f;
+    }
+
+    .empty-state {
+      min-height: 420px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 30px;
+      background: rgba(255,255,255,.86);
+      border: 1px solid rgba(124,58,237,.13);
+      box-shadow: 0 20px 50px rgba(124,58,237,.08);
+      text-align: center;
+      padding: 40px;
+    }
+
+    .empty-state h2 {
+      font-size: 30px;
+      margin-bottom: 10px;
+    }
+
+    .empty-state p {
+      color: #667085;
+      margin-bottom: 22px;
+    }
+
+    .assistant-widget {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 999;
+    }
+
+    .assistant-button {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(135deg, #7c3aed, #ec4899);
+      box-shadow: 0 20px 40px rgba(236, 72, 153, 0.35);
+      transition: 0.25s;
+      position: relative;
+    }
+
+    .assistant-button::before {
+      content: "";
+      position: absolute;
+      width: 22px;
+      height: 16px;
+      border-radius: 10px;
+      background: white;
+      left: 18px;
+      top: 18px;
+    }
+
+    .assistant-button::after {
+      content: "";
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: white;
+      transform: rotate(45deg);
+      left: 24px;
+      top: 31px;
+    }
+
+    .assistant-button:hover {
+      transform: scale(1.06);
+    }
+
+    .assistant-window {
+      display: none;
+      width: 320px;
+      height: 420px;
+      border-radius: 24px;
+      overflow: hidden;
+      background: white;
+      border: 1px solid rgba(124, 58, 237, 0.15);
+      box-shadow: 0 30px 70px rgba(124, 58, 237, 0.2);
+      margin-bottom: 12px;
+    }
+
+    .assistant-window.open {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .assistant-header {
+      background: linear-gradient(135deg, #7c3aed, #ec4899);
+      color: white;
+      padding: 14px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .assistant-header span {
+      cursor: pointer;
+    }
+
+    .assistant-messages {
+      flex: 1;
+      padding: 14px;
+      overflow-y: auto;
+      font-size: 14px;
+    }
+
+    .assistant-message {
+      background: #f5efff;
+      padding: 10px 14px;
+      border-radius: 14px;
+      margin-bottom: 10px;
+      max-width: 80%;
+    }
+
+    .user-message {
+      background: #7c3aed;
+      color: white;
+      margin-left: auto;
+    }
+
+    .assistant-input {
+      display: flex;
+      border-top: 1px solid #eee;
+    }
+
+    .assistant-input input {
+      flex: 1;
+      border: none;
+      padding: 12px;
+      outline: none;
+    }
+
+    .assistant-input button {
+      border: none;
+      background: #7c3aed;
+      color: white;
+      padding: 0 16px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    @media (max-width: 1000px) {
+      .dashboard-summary,
+      .dashboard-grid,
+      .quick-actions {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="dashboard">
+
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Forecastly logo">
+    </div>
+
+    <nav class="side-nav">
+      <a href="{{ url_for('dashboard') }}" class="active">Dashboard</a>
+      <a href="{{ url_for('upload_data') }}">Upload</a>
+      <a href="{{ url_for('library') }}">Library</a>
+    </nav>
+
+    <div class="sidebar-profile">
+      <button class="profile-button" type="button" onclick="toggleProfileMenu()">
+        <div class="profile-avatar">
+          {{ user_name[0] if user_name else 'U' }}
+        </div>
+
+        <div class="profile-info">
+          <strong>{{ user_name if user_name else 'User' }}</strong>
+          <span>Free Plan</span>
+        </div>
+
+        <span class="profile-arrow">⌄</span>
+      </button>
+
+      <div class="profile-menu" id="profileMenu">
+        <a href="{{ url_for('account') }}">Account settings</a>
+        <a href="#">Billing</a>
+        <a href="#">Help center</a>
+        <a href="{{ url_for('logout') }}" class="logout-link">Log out</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <header class="topbar">
+      <div>
+        <p class="breadcrumb">Forecastly / Dashboard</p>
+
+        {% if has_data %}
+          <h1>Hello, {{ user_name }}</h1>
+          <p class="topbar-subtitle">
+            Your previous sales data is saved. Continue forecasting or upload a new dataset.
+          </p>
+        {% else %}
+          <h1>Welcome to Forecastly, {{ user_name }}</h1>
+          <p class="topbar-subtitle">
+            Upload your first CSV file to start forecasting sales.
+          </p>
+        {% endif %}
+      </div>
+
+      <div class="top-actions">
+        {% if has_data %}
+          <a href="{{ url_for('configuration') }}" class="btn primary">Configure forecast</a>
+        {% else %}
+          <a href="{{ url_for('upload_data') }}" class="btn primary">Upload data</a>
+        {% endif %}
+      </div>
+    </header>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="notice">
+          <span></span>
+          {{ messages[0] }}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% if has_data %}
+
+      <section class="notice">
+        <span></span>
+        Latest file uploaded:
+        <b>{{ latest_file.original_filename if latest_file else 'No file name' }}</b>
+      </section>
+
+      <section class="dashboard-summary">
+        <div class="summary-card">
+          <div class="metric-icon"></div>
+          <p>Total Files</p>
+          <h2>{{ total_files | default(0) }}</h2>
+          <small>Saved in your workspace</small>
+        </div>
+
+        <div class="summary-card">
+          <div class="metric-icon blue"></div>
+          <p>Total Rows</p>
+          <h2>{{ total_rows | default(0) }}</h2>
+          <small>Historical sales records</small>
+        </div>
+
+        <div class="summary-card">
+          <div class="metric-icon green"></div>
+          <p>Data Status</p>
+          <h2>Ready</h2>
+          <small>Available for forecasting</small>
+        </div>
+
+        <div class="summary-card">
+          <div class="metric-icon dark"></div>
+          <p>Forecast Status</p>
+          <h2>Prepared</h2>
+          <small>Run configuration to predict</small>
+        </div>
+      </section>
+
+      <section class="dashboard-grid">
+
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Forecast Workspace</h2>
+              <p>Your uploaded data is ready for demand forecasting and analysis.</p>
+            </div>
+          </div>
+
+          <div class="forecast-preview">
+  <div>
+    <h2>Dataset is ready</h2>
+    <p>
+      Latest file: <b>{{ latest_file.original_filename }}</b>
+    </p>
+    <p>
+      Rows: <b>{{ total_rows }}</b> | Columns: <b>{{ total_columns }}</b>
+    </p>
+    <br>
+    <a href="{{ url_for('configuration') }}" class="btn primary">
+      Start Forecasting
+    </a>
+  </div>
+</div>
+
+          <div class="quick-actions">
+            <a href="{{ url_for('configuration') }}" class="quick-action">Configure Forecast</a>
+            <a href="{{ url_for('upload_data') }}" class="quick-action">Upload New Data</a>
+            <a href="{{ url_for('library') }}" class="quick-action">View Library</a>
+          </div>
+        </div>
+
+        <aside class="right-panel">
+
+          <div class="panel">
+            <h2>Recent Activity</h2>
+
+            <div class="activity-item">
+              <div class="status-dot success"></div>
+              <div>
+                <h4>Latest file loaded</h4>
+                <p>{{ latest_file.original_filename if latest_file else 'No recent file' }}</p>
+              </div>
+            </div>
+
+            <div class="activity-item">
+              <div class="status-dot info"></div>
+              <div>
+                <h4>System ready</h4>
+                <p>You can continue with forecast configuration.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h2>Saved Data</h2>
+
+            {% if uploaded_files %}
+              {% for file in uploaded_files[:3] %}
+                <div class="file-item">
+                  <div class="status-dot file"></div>
+                  <div>
+                    <h4>{{ file.original_filename }}</h4>
+                    <p>Saved dataset</p>
+                  </div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="file-item">
+                <div class="status-dot file"></div>
+                <div>
+                  <h4>{{ latest_file.original_filename if latest_file else 'Dataset' }}</h4>
+                  <p>Your latest uploaded file is saved.</p>
+                </div>
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="insight-card">
+            <h3>Recommendation</h3>
+            <p>
+              Use your latest uploaded dataset to configure forecast horizon,
+              compare scenarios, detect anomalies, and export a professional Excel report.
+            </p>
+          </div>
+
+        </aside>
+
+      </section>
+
+    {% else %}
+
+      <div class="empty-state">
+        <h2>No data yet</h2>
+        <p>Upload your first CSV file to start forecasting sales.</p>
+        <a href="{{ url_for('upload_data') }}" class="btn primary">Upload data</a>
+      </div>
+
+    {% endif %}
+
+  </main>
+</div>
+
+<div class="assistant-widget">
+  <button class="assistant-button" onclick="toggleAssistant()" aria-label="Open assistant"></button>
+
+  <div class="assistant-window" id="assistantWindow">
+
+    <div class="assistant-header">
+      <h3>Forecastly Assistant</h3>
+      <span onclick="toggleAssistant()">Close</span>
+    </div>
+
+    <div class="assistant-messages" id="assistantMessages">
+      <div class="assistant-message">Hello. How can I help you with forecasting?</div>
+    </div>
+
+    <div class="assistant-input">
+      <input type="text" id="assistantInput" placeholder="Ask something...">
+      <button onclick="sendMessage()">Send</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function toggleProfileMenu() {
+    document.getElementById("profileMenu").classList.toggle("open");
+  }
+
+  function toggleAssistant() {
+    document.getElementById("assistantWindow").classList.toggle("open");
+  }
+
+  function sendMessage() {
+    const input = document.getElementById("assistantInput");
+    const messages = document.getElementById("assistantMessages");
+
+    if (!input.value.trim()) return;
+
+    const userMsg = document.createElement("div");
+    userMsg.className = "assistant-message user-message";
+    userMsg.textContent = input.value;
+    messages.appendChild(userMsg);
+
+    fetch("{{ url_for('ai_chat') }}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: input.value,
+        page: "dashboard"
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      const botMsg = document.createElement("div");
+      botMsg.className = "assistant-message";
+      botMsg.textContent = data.reply;
+      messages.appendChild(botMsg);
+      messages.scrollTop = messages.scrollHeight;
+    })
+    .catch(() => {
+      const botMsg = document.createElement("div");
+      botMsg.className = "assistant-message";
+      botMsg.textContent = "Sorry, something went wrong.";
+      messages.appendChild(botMsg);
+    });
+
+    input.value = "";
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const input = document.getElementById("assistantInput");
+
+    if (input) {
+      input.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          sendMessage();
+        }
+      });
+    }
+  });
+</script>
+
+</body>
+</html>

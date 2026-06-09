@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Forecastly | Admin Panel</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+
+.dashboard-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.summary-card {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 10px 25px rgba(124,58,237,0.08);
+    border: 1px solid rgba(124,58,237,0.1);
+}
+
+.summary-card p {
+    color: #667085;
+    font-size: 13px;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.summary-card h2 {
+    color: #25113f;
+    font-size: 32px;
+    margin-bottom: 6px;
+}
+
+.summary-card small {
+    color: #7c3aed;
+    font-weight: 600;
+}
+
+.panel {
+    background: white;
+    border-radius: 24px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 15px 35px rgba(124,58,237,0.08);
+    border: 1px solid rgba(124,58,237,0.1);
+}
+
+.panel h2 {
+    color: #25113f;
+    margin-bottom: 20px;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    overflow: hidden;
+    border-radius: 18px;
+}
+
+.data-table thead {
+    background: linear-gradient(135deg, #7c3aed, #ec4899);
+}
+
+.data-table thead th {
+    color: white;
+    padding: 14px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.data-table tbody tr {
+    border-bottom: 1px solid #eee;
+    transition: 0.2s;
+}
+
+.data-table tbody tr:hover {
+    background: #faf5ff;
+}
+
+.data-table td {
+    padding: 14px;
+    color: #374151;
+}
+
+.data-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.rank-badge {
+    background: #7c3aed;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+.logout-btn {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    text-decoration: none;
+    padding: 12px 20px;
+    border-radius: 14px;
+    font-weight: 700;
+    transition: 0.2s;
+    display: inline-block;
+}
+
+.logout-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(220,38,38,0.25);
+}
+
+@media (max-width: 900px) {
+
+    .dashboard-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .data-table {
+        font-size: 12px;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="dashboard">
+
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Forecastly logo">
+    </div>
+
+    <nav class="side-nav">
+      
+      <a href="{{ url_for('admin_dashboard') }}" class="active">Admin Panel</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+
+  <div>
+    <p class="breadcrumb">Forecastly / Admin Panel</p>
+    <h1>Admin Dashboard</h1>
+    <p class="topbar-subtitle">
+      Monitor users, uploaded datasets, and system activity.
+    </p>
+  </div>
+
+  <div>
+    <a href="{{ url_for('logout') }}" class="logout-btn">
+      Log Out
+    </a>
+  </div>
+
+</header>
+    <section class="dashboard-summary">
+      <div class="summary-card">
+        <p>Total Users</p>
+        <h2>{{ total_users }}</h2>
+        <small>Registered accounts</small>
+      </div>
+
+      <div class="summary-card">
+        <p>Total Files</p>
+        <h2>{{ total_files }}</h2>
+        <small>Uploaded datasets</small>
+      </div>
+
+      <div class="summary-card">
+        <p>Total Rows</p>
+        <h2>{{ total_rows }}</h2>
+        <small>Processed sales records</small>
+      </div>
+
+      <div class="summary-card">
+        <p>System Status</p>
+        <h2>Active</h2>
+        <small>Forecastly is running</small>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>User Library</h2>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Files</th>
+            <th>Rows</th>
+            <th>Registered</th>
+            <th>Role</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td>{{ user.full_name }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.files | length }}</td>
+            <td>
+              {{ user.files | sum(attribute='rows_count') }}
+            </td>
+            <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+            <td>
+              {% if user.is_admin %}
+                Admin
+              {% else %}
+                User
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+   <section class="panel" style="margin-top: 24px;">
+  <h2>Recent Uploaded Datasets</h2>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>File Name</th>
+        <th>User ID</th>
+        <th>Rows</th>
+        <th>Columns</th>
+        <th>Status</th>
+        <th>Uploaded At</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for file in files[:5] %}
+      <tr>
+        <td>{{ file.original_filename }}</td>
+        <td>{{ file.user_id }}</td>
+        <td>{{ file.rows_count }}</td>
+        <td>{{ file.columns_count }}</td>
+        <td>{{ file.status }}</td>
+        <td>{{ file.uploaded_at.strftime('%Y-%m-%d %H:%M') }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+<section class="panel" style="margin-top: 24px;">
+  <h2>User Activity Leaderboard</h2>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>User</th>
+        <th>Email</th>
+        <th>Files Uploaded</th>
+        <th>Total Rows</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for user in leaderboard[:5] %}
+      <tr>
+        <td>#{{ loop.index }}</td>
+        <td>{{ user.full_name }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.files | length }}</td>
+        <td>{{ user.files | sum(attribute='rows_count') }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+  </main>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Forecastly | Configuration</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  <style>
+    .config-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .config-main {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .config-card,
+    .forecast-preview {
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid rgba(124, 58, 237, 0.13);
+      border-radius: 28px;
+      box-shadow: 0 24px 60px rgba(124, 58, 237, 0.10);
+      padding: 28px;
+    }
+
+    .config-card h2,
+    .forecast-preview h2 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+
+    .config-card > p {
+      color: #667085;
+      margin-bottom: 22px;
+    }
+
+    .option-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .option-buttons button {
+      border: 1px solid rgba(124, 58, 237, 0.15);
+      background: #fff;
+      padding: 13px 20px;
+      border-radius: 16px;
+      font-weight: 800;
+      color: #667085;
+      cursor: pointer;
+      transition: 0.25s ease;
+    }
+
+    .option-buttons button:hover,
+    .option-buttons button.selected {
+      background: #f5efff;
+      color: #7c3aed;
+      border-color: #7c3aed;
+      transform: translateY(-2px);
+    }
+
+    .info-box {
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 18px;
+      background: #fbf7ff;
+      color: #667085;
+    }
+
+    .info-box b {
+      color: #7c3aed;
+    }
+
+    .granularity-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .granularity-card {
+      padding: 22px;
+      border-radius: 22px;
+      border: 1px solid rgba(124, 58, 237, 0.12);
+      background: #fff;
+      cursor: pointer;
+      transition: 0.25s ease;
+    }
+
+    .granularity-card:hover,
+    .granularity-card.selected {
+      border-color: #ec4899;
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(236, 72, 153, 0.08));
+      transform: translateY(-2px);
+    }
+
+    .granularity-card h3 {
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+
+    .granularity-card p {
+      color: #667085;
+      font-size: 14px;
+    }
+
+    .advanced-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+    }
+
+    .advanced-grid h4 {
+      color: #8b5cf6;
+      margin-bottom: 18px;
+      text-transform: uppercase;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+    }
+
+    .switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      color: #111827;
+      font-weight: 600;
+    }
+
+    .switch-row input {
+      width: 18px;
+      height: 18px;
+      accent-color: #8b5cf6;
+    }
+
+    .algorithm-box {
+      margin-top: 20px;
+    }
+
+    .algorithm-box label {
+      display: block;
+      margin-bottom: 8px;
+      color: #667085;
+      font-weight: 700;
+    }
+
+    .algorithm-box select {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(124, 58, 237, 0.18);
+      font-family: "Inter", sans-serif;
+      font-weight: 700;
+      color: #111827;
+      outline: none;
+      background: #fff;
+    }
+
+    .forecast-preview {
+      position: sticky;
+      top: 28px;
+    }
+
+    .mini-chart {
+      height: 190px;
+      margin: 24px 0;
+      border-radius: 22px;
+      background: #fbf7ff;
+      padding: 18px;
+    }
+
+    .mini-chart svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .preview-area {
+      fill: rgba(236, 72, 153, 0.16);
+    }
+
+    .preview-line {
+      fill: none;
+      stroke: #7c3aed;
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .preview-stats {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .preview-stats div {
+      padding: 16px;
+      border-radius: 18px;
+      background: #fbf7ff;
+    }
+
+    .preview-stats p {
+      color: #667085;
+      font-size: 13px;
+      text-transform: uppercase;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .preview-stats h3 {
+      font-size: 18px;
+    }
+
+    .preview-btn,
+    .generate-btn {
+      border: none;
+      cursor: pointer;
+    }
+
+    .preview-btn {
+      width: 100%;
+    }
+
+    @media (max-width: 1000px) {
+      .config-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .forecast-preview {
+        position: static;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .granularity-grid,
+      .advanced-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="dashboard">
+
+  <aside class="sidebar">
+    <div class="logo">
+      <img class="logo-image" src="{{ url_for('static', filename='images/logo.png') }}" alt="Forecastly logo">
+    </div>
+
+    <nav class="side-nav">
+
+  <a href="{{ url_for('dashboard') }}"
+     class="{% if request.endpoint == 'dashboard' %}active{% endif %}">
+    Dashboard
+  </a>
+
+  <a href="{{ url_for('upload_data') }}"
+     class="{% if request.endpoint == 'upload_data' %}active{% endif %}">
+    Upload
+  </a>
+
+  <a href="{{ url_for('library') }}"
+     class="{% if request.endpoint == 'library' %}active{% endif %}">
+    Library
+  </a>
+
+</nav>
+
+    <div class="sidebar-profile">
+      <button class="profile-button" type="button" onclick="toggleProfileMenu()">
+        <div class="profile-avatar">
+          {{ user_name[0] if user_name else 'U' }}
+        </div>
+
+        <div class="profile-info">
+          <strong>{{ user_name if user_name else 'User' }}</strong>
+          <span>Free Plan</span>
+        </div>
+
+        <span class="profile-arrow">⌄</span>
+      </button>
+
+      <div class="profile-menu" id="profileMenu">
+        <a href="{{ url_for('account') }}">Account settings</a>
+        <a href="#">Billing</a>
+        <a href="#">Help center</a>
+        <a href="{{ url_for('logout') }}" class="logout-link">Log out</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <form method="POST" action="{{ url_for('configuration') }}" id="configForm">
+
+      <header class="topbar">
+        <div>
+          <p class="breadcrumb">Forecastly / Forecast / Configuration</p>
+          <h1>Forecast Configuration</h1>
+        </div>
+
+        <div class="top-actions">
+          <a href="{{ url_for('dashboard') }}" class="btn secondary">Cancel</a>
+
+          <button type="button" class="btn primary generate-btn" onclick="submitConfigForm()">
+            Generate Forecast
+          </button>
+        </div>
+      </header>
+
+      <section class="config-layout">
+
+        <div class="config-main">
+
+          <input type="hidden" name="forecast_days" id="forecastDaysInput" value="30">
+          <input type="hidden" name="granularity" id="granularityInput" value="Monthly">
+          <input type="hidden" name="marketplace" value="Kaspi">
+
+          <div class="config-card">
+            <h2>Forecast Horizon</h2>
+            <p>How far into the future should the model predict sales?</p>
+
+            <div class="option-buttons">
+              <button type="button" data-days="7">7 days</button>
+              <button type="button" data-days="14">14 days</button>
+              <button type="button" data-days="30" class="selected">30 days</button>
+              <button type="button" data-days="60">60 days</button>
+              <button type="button" data-days="90">90 days</button>
+            </div>
+
+            <div class="info-box">
+              Projecting demand for the next <b id="horizonText">30 days</b>.
+            </div>
+          </div>
+
+          <div class="config-card">
+            <h2>Time Granularity</h2>
+            <p>Choose how detailed your forecast should be.</p>
+
+            <div class="granularity-grid">
+              <div class="granularity-card" data-granularity="Daily">
+                <h3>Daily</h3>
+                <p>Best for short-term planning</p>
+              </div>
+
+              <div class="granularity-card" data-granularity="Weekly">
+                <h3>Weekly</h3>
+                <p>Balanced detail</p>
+              </div>
+
+              <div class="granularity-card selected" data-granularity="Monthly">
+                <h3>Monthly</h3>
+                <p>Long-term planning</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="config-card">
+            <h2>Advanced Configuration</h2>
+
+            <div class="advanced-grid">
+
+              <div>
+                <h4>Feature Engineering</h4>
+
+                <label class="switch-row">
+                  <span>Include promotions</span>
+                  <input type="checkbox" checked>
+                </label>
+
+                <label class="switch-row">
+                  <span>Include holidays</span>
+                  <input type="checkbox" checked>
+                </label>
+
+                <label class="switch-row">
+                  <span>Include seasonality</span>
+                  <input type="checkbox" checked>
+                </label>
+              </div>
+
+              <div>
+                <h4>Model Settings</h4>
+
+                <label class="switch-row">
+                  <span>Auto-detect anomalies</span>
+                  <input type="checkbox" checked>
+                </label>
+
+                <label class="switch-row">
+                  <span>Allow negative growth</span>
+                  <input type="checkbox">
+                </label>
+
+                <div class="algorithm-box">
+                  <label>Algorithm</label>
+                  <select name="algorithm">
+                    <option>Auto Recommended</option>
+                    <option>Linear Regression</option>
+                    <option>Moving Average</option>
+                    <option>ARIMA</option>
+                    <option>LSTM</option>
+                  </select>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <aside class="forecast-preview">
+          <h2>Forecast Preview</h2>
+
+          <div class="mini-chart">
+            <svg viewBox="0 0 300 180" preserveAspectRatio="none">
+              <path class="preview-area"
+                d="M0 140 L50 110 L100 125 L150 80 L200 100 L250 65 L300 75 L300 180 L0 180 Z" />
+              <path class="preview-line"
+                d="M0 140 L50 110 L100 125 L150 80 L200 100 L250 65 L300 75" />
+            </svg>
+          </div>
+
+          <div class="preview-stats">
+            <div>
+              <p>Horizon</p>
+              <h3 id="previewHorizon">30 days</h3>
+            </div>
+
+            <div>
+              <p>Granularity</p>
+              <h3 id="previewGranularity">Monthly</h3>
+            </div>
+
+            <div>
+              <p>Status</p>
+              <h3>Ready</h3>
+            </div>
+          </div>
+
+          <button type="button" class="btn primary preview-btn" id="generateBtn" onclick="submitConfigForm()">
+            Generate 30-Day Forecast →
+          </button>
+        </aside>
+
+      </section>
+
+    </form>
+
+  </main>
+
+</div>
+
+<script>
+  function toggleProfileMenu() {
+    document.getElementById("profileMenu").classList.toggle("open");
+  }
+
+  function submitConfigForm() {
+    document.getElementById("configForm").submit();
+  }
+
+  const horizonButtons = document.querySelectorAll(".option-buttons button");
+  const horizonText = document.getElementById("horizonText");
+  const previewHorizon = document.getElementById("previewHorizon");
+  const generateBtn = document.getElementById("generateBtn");
+  const forecastDaysInput = document.getElementById("forecastDaysInput");
+
+  horizonButtons.forEach(button => {
+    button.addEventListener("click", () => {
+      horizonButtons.forEach(btn => btn.classList.remove("selected"));
+      button.classList.add("selected");
+
+      const days = button.dataset.days;
+      const label = `${days} days`;
+
+      forecastDaysInput.value = days;
+      horizonText.textContent = label;
+      previewHorizon.textContent = label;
+      generateBtn.textContent = `Generate ${days}-Day Forecast →`;
+    });
+  });
+
+  const granularityCards = document.querySelectorAll(".granularity-card");
+  const granularityInput = document.getElementById("granularityInput");
+  const previewGranularity = document.getElementById("previewGranularity");
+
+  granularityCards.forEach(card => {
+    card.addEventListener("click", () => {
+      granularityCards.forEach(item => item.classList.remove("selected"));
+      card.classList.add("selected");
+
+      const value = card.dataset.granularity;
+
+      granularityInput.value = value;
+      previewGranularity.textContent = value;
+    });
+  });
+</script>
+
+</body>
+</html>

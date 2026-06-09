@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Forecastly | Upload Data</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  <style>
+
+    .upload-layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .upload-card {
+      min-height: 430px;
+      border: 2px dashed rgba(124, 58, 237, 0.25);
+      border-radius: 30px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(236, 72, 153, 0.14), transparent 45%),
+        rgba(255, 255, 255, 0.82);
+      box-shadow: 0 24px 70px rgba(124, 58, 237, 0.10);
+      padding: 58px 36px;
+      text-align: center;
+    }
+
+    .upload-icon {
+      width: 70px;
+      height: 70px;
+      margin: 0 auto 22px;
+      border-radius: 24px;
+      display: grid;
+      place-items: center;
+      font-size: 32px;
+      background: linear-gradient(
+        135deg,
+        rgba(124, 58, 237, 0.16),
+        rgba(236, 72, 153, 0.16)
+      );
+    }
+
+    .upload-card h2 {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      margin-bottom: 10px;
+    }
+
+    .upload-card p {
+      color: #667085;
+      line-height: 1.6;
+    }
+
+    .or-text {
+      margin: 24px 0;
+      color: #9ca3af;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+    }
+
+    .file-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 15px 24px;
+      border-radius: 18px;
+      background: #f5efff;
+      color: #7c3aed;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.25s ease;
+    }
+
+    .file-button:hover {
+      transform: translateY(-2px);
+      background: #efe3ff;
+    }
+
+    .file-button input {
+      display: none;
+    }
+
+    .selected-file {
+      margin-top: 16px;
+      color: #7c3aed;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .upload-info {
+      margin: 28px 0;
+      display: flex;
+      justify-content: center;
+      gap: 22px;
+      flex-wrap: wrap;
+      color: #667085;
+      font-size: 14px;
+    }
+
+    .upload-submit {
+      min-width: 200px;
+    }
+
+    .upload-side {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .support-card,
+    .template-card {
+      padding: 24px;
+      border-radius: 26px;
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid rgba(124, 58, 237, 0.13);
+      box-shadow: 0 24px 60px rgba(124, 58, 237, 0.10);
+    }
+
+    .support-card h3,
+    .template-card h3 {
+      font-size: 19px;
+      margin-bottom: 16px;
+      letter-spacing: -0.03em;
+    }
+
+    .template-card p {
+      color: #667085;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .format-list {
+      display: flex;
+      gap: 10px;
+    }
+
+    .format-list span {
+      padding: 10px 16px;
+      border-radius: 14px;
+      background: #f5efff;
+      color: #7c3aed;
+      font-weight: 800;
+    }
+
+    .template-btn {
+      margin-top: 20px;
+      width: 100%;
+    }
+
+    @media (max-width: 1000px) {
+      .upload-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .upload-card {
+        padding: 42px 22px;
+      }
+
+      .upload-info {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+
+    .ai-bot {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 999;
+    }
+
+    .bot-button {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      background: linear-gradient(135deg, #7c3aed, #ec4899);
+      color: white;
+      box-shadow: 0 20px 40px rgba(236, 72, 153, 0.4);
+      transition: 0.25s;
+    }
+
+    .bot-button:hover {
+      transform: scale(1.1);
+    }
+
+    .bot-window {
+      display: none;
+      width: 320px;
+      height: 420px;
+      border-radius: 24px;
+      overflow: hidden;
+      background: white;
+      border: 1px solid rgba(124, 58, 237, 0.15);
+      box-shadow: 0 30px 70px rgba(124, 58, 237, 0.2);
+      margin-bottom: 12px;
+    }
+
+    .bot-window.open {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .bot-header {
+      background: linear-gradient(135deg, #7c3aed, #ec4899);
+      color: white;
+      padding: 14px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .bot-messages {
+      flex: 1;
+      padding: 14px;
+      overflow-y: auto;
+      font-size: 14px;
+    }
+
+    .bot-message {
+      background: #f5efff;
+      padding: 10px 14px;
+      border-radius: 14px;
+      margin-bottom: 10px;
+      max-width: 80%;
+    }
+
+    .user-message {
+      background: #7c3aed;
+      color: white;
+      margin-left: auto;
+    }
+
+    .bot-input {
+      display: flex;
+      border-top: 1px solid #eee;
+    }
+
+    .bot-input input {
+      flex: 1;
+      border: none;
+      padding: 12px;
+      outline: none;
+    }
+
+    .bot-input button {
+      border: none;
+      background: #7c3aed;
+      color: white;
+      padding: 0 16px;
+      cursor: pointer;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="dashboard">
+
+  <aside class="sidebar">
+
+    <div class="logo">
+      <img class="logo-image"
+           src="{{ url_for('static', filename='images/logo.png') }}"
+           alt="Forecastly logo">
+    </div>
+
+    <nav class="side-nav">
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('upload_data') }}" class="active">Upload</a>
+      <a href="{{ url_for('library') }}">Library</a>
+    </nav>
+
+    <div class="sidebar-profile">
+
+      <button class="profile-button"
+              type="button"
+              onclick="toggleProfileMenu()">
+
+        <div class="profile-avatar">
+          {{ user_name[0] if user_name else 'U' }}
+        </div>
+
+        <div class="profile-info">
+          <strong>{{ user_name if user_name else 'User' }}</strong>
+          <span>Free Plan</span>
+        </div>
+
+        <span class="profile-arrow">⌄</span>
+
+      </button>
+
+      <div class="profile-menu" id="profileMenu">
+        <a href="{{ url_for('account') }}">Account settings</a>
+        <a href="#">Billing</a>
+        <a href="#">Help center</a>
+        <a href="{{ url_for('logout') }}" class="logout-link">
+          Log out
+        </a>
+      </div>
+
+    </div>
+
+  </aside>
+
+  <main class="main">
+
+    <header class="topbar">
+
+      <div>
+        <p class="breadcrumb">Forecastly / Data / Upload</p>
+        <h1>Upload Data</h1>
+      </div>
+
+      <div class="top-actions">
+        <a href="{{ url_for('dashboard') }}"
+           class="btn secondary">
+          Back to dashboard
+        </a>
+      </div>
+
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+
+          <div class="notice {{ category }}">
+            <span></span>
+            {{ message }}
+          </div>
+
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <section class="upload-layout">
+
+      <form class="upload-card"
+            action="{{ url_for('upload_data') }}"
+            method="POST"
+            enctype="multipart/form-data">
+
+        <div class="upload-icon">☁️</div>
+
+        <h2>Drop your CSV file here</h2>
+
+        <p>
+          Upload your historical marketplace sales data
+          to start forecasting.
+        </p>
+
+        <div class="or-text">OR</div>
+
+        <label class="file-button">
+
+          Browse file
+
+          <input
+            type="file"
+            name="file"
+            id="fileInput"
+            accept=".csv"
+            required
+          >
+
+        </label>
+
+        <p id="selectedFileName" class="selected-file">
+          No file selected
+        </p>
+
+        <div class="upload-info">
+          <span>Max 50MB</span>
+          <span>CSV format</span>
+        </div>
+
+        <button type="submit"
+                class="btn primary upload-submit">
+          Upload & Continue
+        </button>
+
+      </form>
+
+      <aside class="upload-side">
+
+        <div class="support-card">
+
+          <h3>Supported Format</h3>
+
+          <div class="format-list">
+            <span>CSV</span>
+          </div>
+
+        </div>
+
+        <div class="template-card">
+
+          <h3>Start with a template</h3>
+
+          <p>
+            Your file should include sales dates,
+            product SKU, product name,
+            units sold, revenue,
+            and marketplace name.
+          </p>
+
+           <a href="{{ url_for('download_template') }}" class="btn secondary">
+    Download Template
+</a>
+
+        </div>
+
+      </aside>
+
+    </section>
+
+  </main>
+
+</div>
+
+<div class="ai-bot">
+
+  <button class="bot-button" onclick="toggleBot()">
+    💬
+  </button>
+
+  <div class="bot-window" id="botWindow">
+
+    <div class="bot-header">
+      <h3>Forecastly AI</h3>
+      <span onclick="toggleBot()">✕</span>
+    </div>
+
+    <div class="bot-messages" id="botMessages">
+      <div class="bot-message">
+        Hi 👋 How can I help you?
+      </div>
+    </div>
+
+    <div class="bot-input">
+      <input type="text"
+             id="botInput"
+             placeholder="Ask something...">
+
+      <button onclick="sendMessage()">→</button>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+  function toggleProfileMenu() {
+    document.getElementById("profileMenu")
+      .classList.toggle("open");
+  }
+
+</script>
+
+<script>
+
+  function toggleBot() {
+    document.getElementById("botWindow")
+      .classList.toggle("open");
+  }
+
+  function sendMessage() {
+
+    const input =
+      document.getElementById("botInput");
+
+    const messages =
+      document.getElementById("botMessages");
+
+    if (!input.value.trim()) return;
+
+    const userMsg =
+      document.createElement("div");
+
+    userMsg.className =
+      "bot-message user-message";
+
+    userMsg.textContent =
+      input.value;
+
+    messages.appendChild(userMsg);
+
+    const botMsg =
+      document.createElement("div");
+
+    botMsg.className = "bot-message";
+
+    botMsg.textContent =
+      getBotResponse(input.value);
+
+    messages.appendChild(botMsg);
+
+    input.value = "";
+
+    messages.scrollTop =
+      messages.scrollHeight;
+  }
+
+  function getBotResponse(text) {
+
+    text = text.toLowerCase();
+
+    if (text.includes("forecast"))
+      return "Go to Upload → Configuration to start forecasting 📊";
+
+    if (text.includes("upload"))
+      return "Upload your CSV file in the Upload page.";
+
+    if (text.includes("accuracy"))
+      return "Accuracy shows how close predictions are to real data.";
+
+    return "I'm here to help with Forecastly 😊";
+  }
+
+</script>
+
+<script>
+
+  const fileInput =
+    document.getElementById("fileInput");
+
+  const selectedFileName =
+    document.getElementById("selectedFileName");
+
+  fileInput.addEventListener("change", function () {
+
+    if (fileInput.files.length > 0) {
+
+      selectedFileName.textContent =
+        "Selected file: " +
+        fileInput.files[0].name;
+
+    } else {
+
+      selectedFileName.textContent =
+        "No file selected";
+
+    }
+
+  });
+
+</script>
+
+</body>
+</html>

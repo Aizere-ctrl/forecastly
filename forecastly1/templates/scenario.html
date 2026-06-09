@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Forecastly | Scenario Analysis</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+
+    .scenario-chart-card {
+      padding: 26px;
+      border-radius: 28px;
+      background: rgba(255,255,255,0.82);
+      border: 1px solid rgba(124,58,237,0.13);
+      box-shadow: 0 24px 60px rgba(124,58,237,0.1);
+      margin-bottom: 22px;
+    }
+
+    .scenario-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .scenario-head h2 {
+      color: #21133f;
+      margin-bottom: 6px;
+    }
+
+    .scenario-head p {
+      color: #667085;
+      line-height: 1.5;
+    }
+
+    .legend {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #667085;
+    }
+
+    .legend span::before {
+      content: "";
+      display: inline-block;
+      width: 18px;
+      height: 3px;
+      border-radius: 999px;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    .actual-dot::before {
+      background: #94a3b8;
+    }
+
+    .pos-dot::before {
+      background: #06b6d4;
+    }
+
+    .real-dot::before {
+      background: #7c3aed;
+    }
+
+    .neg-dot::before {
+      background: #f59e0b;
+    }
+
+    .scenario-chart {
+      height: 360px;
+      background: #fbf7ff;
+      border-radius: 22px;
+      padding: 18px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .scenario-chart canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .scenario-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .scenario-stat-card {
+      padding: 22px;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.82);
+      border: 1px solid rgba(124,58,237,0.13);
+      box-shadow: 0 20px 50px rgba(124,58,237,0.08);
+    }
+
+    .scenario-stat-card p {
+      color: #667085;
+      margin-bottom: 14px;
+      font-weight: 700;
+    }
+
+    .scenario-stat-card div {
+      display: flex;
+      justify-content: space-between;
+      margin: 8px 0;
+      gap: 8px;
+    }
+
+    .scenario-stat-card span {
+      color: #7c3aed;
+      font-weight: 700;
+    }
+
+    .scenario-stat-card b {
+      color: #21133f;
+    }
+
+    .scenario-bottom {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 24px;
+  margin-bottom: 24px;
+  align-items: start;
+}
+
+    .insight-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  margin-top: 16px;
+}
+
+    .insight-card,
+    .drivers-card {
+      padding: 22px;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.82);
+      border: 1px solid rgba(124,58,237,0.13);
+      box-shadow: 0 20px 50px rgba(124,58,237,0.08);
+    }
+
+    .insight-card h3 {
+      color: #21133f;
+      margin-bottom: 10px;
+    }
+
+    .insight-card p {
+      color: #667085;
+      line-height: 1.6;
+    }
+    .insight-card.large {
+  padding: 28px;
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.insight-card.large h3 {
+  font-size: 28px;
+  margin-bottom: 18px;
+}
+
+.insight-card.large p {
+  font-size: 18px;
+  line-height: 1.9;
+}
+    .drivers-card h2 {
+      color: #21133f;
+      margin-bottom: 18px;
+    }
+
+    .driver-bar {
+      height: 12px;
+      border-radius: 999px;
+      background: #f5efff;
+      margin-bottom: 18px;
+      overflow: hidden;
+    }
+
+    .driver-bar span {
+      display: block;
+      width: 78%;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(
+        135deg,
+        #06b6d4,
+        #7c3aed,
+        #ec4899
+      );
+    }
+
+    .driver-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 12px 0;
+      color: #667085;
+    }
+
+    .driver-row b {
+      color: #7c3aed;
+    }
+
+    .driver-row.negative b {
+      color: #ec4899;
+    }
+
+    .scenario-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 18px;
+      padding-bottom: 40px;
+    }
+
+    .empty-state {
+      padding: 24px;
+      border-radius: 22px;
+      background: #fbf7ff;
+      border: 1px dashed rgba(124,58,237,0.25);
+      color: #667085;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 1100px) {
+
+      .scenario-stats,
+      .scenario-bottom,
+      .insight-grid {
+        grid-template-columns: 1fr;
+      }
+
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="dashboard">
+
+  <aside class="sidebar">
+
+    <div class="logo">
+      <img
+        class="logo-image"
+        src="{{ url_for('static', filename='images/logo.png') }}"
+        alt="Forecastly logo"
+      >
+    </div>
+
+    <nav class="side-nav">
+
+      <a
+        href="{{ url_for('dashboard') }}"
+        class="{% if request.endpoint == 'dashboard' %}active{% endif %}"
+      >
+        Dashboard
+      </a>
+
+      <a
+        href="{{ url_for('upload_data') }}"
+        class="{% if request.endpoint == 'upload_data' %}active{% endif %}"
+      >
+        Upload
+      </a>
+
+      <a
+        href="{{ url_for('library') }}"
+        class="{% if request.endpoint == 'library' %}active{% endif %}"
+      >
+        Library
+      </a>
+
+    </nav>
+
+    <div class="sidebar-profile">
+
+      <button
+        class="profile-button"
+        type="button"
+        onclick="toggleProfileMenu()"
+      >
+
+        <div class="profile-avatar">
+          {{ user_name[0] if user_name else 'U' }}
+        </div>
+
+        <div class="profile-info">
+          <strong>{{ user_name if user_name else 'User' }}</strong>
+          <span>Free Plan</span>
+        </div>
+
+        <span class="profile-arrow">⌄</span>
+
+      </button>
+
+      <div class="profile-menu" id="profileMenu">
+        <a href="{{ url_for('account') }}">Account settings</a>
+        <a href="#">Billing</a>
+        <a href="#">Help center</a>
+        <a href="{{ url_for('logout') }}" class="logout-link">Log out</a>
+      </div>
+
+    </div>
+
+  </aside>
+
+  <main class="main">
+
+    <header class="topbar">
+
+      <div>
+        <p class="breadcrumb">
+          Forecastly / Forecast / Scenario Analysis
+        </p>
+
+        <h1>Scenario Analysis</h1>
+      </div>
+
+      <div class="top-actions">
+        <a
+          href="{{ url_for('dashboard') }}"
+          class="btn secondary"
+        >
+          Back to dashboard
+        </a>
+      </div>
+
+    </header>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="notice">
+          <span></span>
+          {{ messages[0] }}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% if scenarios %}
+
+    <section class="scenario-chart-card">
+
+      <div class="scenario-head">
+
+        <div>
+          <h2>Actual vs Forecast — All Scenarios</h2>
+
+          <p>
+            Interactive visualization based on uploaded CSV data
+            and AI-generated forecast scenarios.
+          </p>
+        </div>
+
+        <div class="legend">
+          <span class="actual-dot">Actual</span>
+          <span class="pos-dot">Optimistic</span>
+          <span class="real-dot">Realistic</span>
+          <span class="neg-dot">Pessimistic</span>
+        </div>
+
+      </div>
+
+      <div class="scenario-chart">
+        <canvas id="scenarioChart"></canvas>
+      </div>
+
+    </section>
+
+    <section class="scenario-stats">
+
+      <div class="scenario-stat-card">
+        <p>Forecast Sales</p>
+
+        <div>
+          <span>Optimistic</span>
+          <b>{{ scenarios.optimistic }}</b>
+        </div>
+
+        <div>
+          <span>Realistic</span>
+          <b>{{ scenarios.realistic }}</b>
+        </div>
+
+        <div>
+          <span>Pessimistic</span>
+          <b>{{ scenarios.pessimistic }}</b>
+        </div>
+      </div>
+
+      <div class="scenario-stat-card">
+        <p>Scenario Difference</p>
+
+        <div>
+          <span>Upside</span>
+          <b>+15%</b>
+        </div>
+
+        <div>
+          <span>Baseline</span>
+          <b>0%</b>
+        </div>
+
+        <div>
+          <span>Downside</span>
+          <b>-15%</b>
+        </div>
+      </div>
+
+      <div class="scenario-stat-card">
+        <p>Business Meaning</p>
+
+        <div>
+          <span>Best case</span>
+          <b>High demand</b>
+        </div>
+
+        <div>
+          <span>Normal case</span>
+          <b>Stable demand</b>
+        </div>
+
+        <div>
+          <span>Risk case</span>
+          <b>Low demand</b>
+        </div>
+      </div>
+
+      <div class="scenario-stat-card">
+        <p>Suggested Action</p>
+
+        <div>
+          <span>Optimistic</span>
+          <b>Prepare stock</b>
+        </div>
+
+        <div>
+          <span>Realistic</span>
+          <b>Monitor sales</b>
+        </div>
+
+        <div>
+          <span>Pessimistic</span>
+          <b>Reduce risk</b>
+        </div>
+      </div>
+
+    </section>
+
+    <section class="scenario-bottom">
+
+      <div>
+
+        <h2>AI Scenario Insights</h2>
+
+        <div class="insight-grid">
+
+          {% if ai_insights %}
+
+            {% for insight in ai_insights %}
+
+              <div class="insight-card large">
+              <h3>AI Scenario Insight</h3>
+              <p>{{ insight }}</p>
+              </div>
+
+            {% endfor %}
+
+          {% else %}
+
+            <div class="insight-card">
+              <h3>No insights yet</h3>
+
+              <p>
+                Upload sales data and generate a forecast
+                to receive scenario insights.
+              </p>
+            </div>
+
+          {% endif %}
+
+        </div>
+
+      </div>
+
+      <div class="drivers-card">
+
+        <h2>Key Drivers</h2>
+
+        <div class="driver-bar">
+          <span></span>
+        </div>
+
+        <div class="driver-row">
+          <p>Historical trend</p>
+<b>
+  {% if scenarios.realistic > scenarios.pessimistic %}
+    Positive
+  {% else %}
+    Unstable
+  {% endif %}
+</b>
+        </div>
+
+        <div class="driver-row">
+          <p>Demand outlook</p>
+<b>
+  {% if scenarios.optimistic > scenarios.realistic %}
+    Growing
+  {% else %}
+    Stable
+  {% endif %}
+</b>
+        </div>
+
+        <div class="driver-row">
+          <p>Forecast horizon</p>
+<b>{{ forecast_data|length }} days</b>
+        </div>
+
+        <div class="driver-row negative">
+          <p>Market uncertainty</p>
+<b>
+  {% if anomalies and anomalies|length > 3 %}
+    High
+  {% elif anomalies and anomalies|length > 0 %}
+    Medium
+  {% else %}
+    Low
+  {% endif %}
+</b>
+        </div>
+
+      </div>
+
+    </section>
+
+    <div class="scenario-actions">
+
+      <a
+        href="{{ url_for('analytics_page') }}"
+        class="btn primary"
+      >
+        View analytics
+      </a>
+
+      <a
+        href="{{ url_for('anomalies_page') }}"
+        class="btn secondary"
+      >
+        Check anomalies
+      </a>
+
+    </div>
+
+    {% else %}
+
+    <section class="scenario-chart-card">
+
+      <div class="empty-state">
+
+        <h2>No scenario data yet</h2>
+
+        <p>
+          Upload your CSV file and complete forecast configuration first.
+        </p>
+
+        <br>
+
+        <a
+          href="{{ url_for('upload_data') }}"
+          class="btn primary"
+        >
+          Upload CSV
+        </a>
+
+      </div>
+
+    </section>
+
+    {% endif %}
+
+  </main>
+
+</div>
+
+<script>
+
+  function toggleProfileMenu() {
+    document.getElementById("profileMenu").classList.toggle("open");
+  }
+
+  const scenarioCanvas = document.getElementById("scenarioChart");
+
+  if (scenarioCanvas) {
+
+    const chartData = JSON.parse(
+      '{{ chart_data | tojson | safe }}'
+    );
+
+    const ctx = scenarioCanvas.getContext("2d");
+
+    new Chart(ctx, {
+
+      type: "line",
+
+      data: {
+
+        labels: chartData.labels || [],
+
+        datasets: [
+
+          {
+            label: "Actual Sales",
+
+            data: chartData.actual || [],
+
+            borderColor: "#94a3b8",
+            backgroundColor: "rgba(148,163,184,0.08)",
+
+            tension: 0.4,
+            borderWidth: 3,
+
+            pointRadius: 4,
+            pointHoverRadius: 7,
+
+            spanGaps: true
+          },
+
+          {
+            label: "Optimistic",
+
+            data: chartData.optimistic || [],
+
+            borderColor: "#06b6d4",
+            backgroundColor: "rgba(6,182,212,0.08)",
+
+            tension: 0.4,
+            borderDash: [8, 6],
+
+            borderWidth: 3,
+
+            pointRadius: 4,
+            pointHoverRadius: 7,
+
+            spanGaps: true
+          },
+
+          {
+            label: "Realistic",
+
+            data: chartData.realistic || [],
+
+            borderColor: "#7c3aed",
+            backgroundColor: "rgba(124,58,237,0.08)",
+
+            tension: 0.4,
+            borderDash: [8, 6],
+
+            borderWidth: 3,
+
+            pointRadius: 4,
+            pointHoverRadius: 7,
+
+            spanGaps: true
+          },
+
+          {
+            label: "Pessimistic",
+
+            data: chartData.pessimistic || [],
+
+            borderColor: "#f59e0b",
+            backgroundColor: "rgba(245,158,11,0.08)",
+
+            tension: 0.4,
+            borderDash: [8, 6],
+
+            borderWidth: 3,
+
+            pointRadius: 4,
+            pointHoverRadius: 7,
+
+            spanGaps: true
+          }
+
+        ]
+      },
+
+      options: {
+
+        responsive: true,
+        maintainAspectRatio: false,
+
+        interaction: {
+          intersect: false,
+          mode: "index"
+        },
+
+        plugins: {
+
+          legend: {
+            display: false
+          },
+
+          tooltip: {
+            backgroundColor: "#21133f",
+            titleColor: "#ffffff",
+            bodyColor: "#ffffff",
+            padding: 12,
+            cornerRadius: 12
+          }
+
+        },
+
+        scales: {
+
+          x: {
+
+            grid: {
+              color: "rgba(124,58,237,0.05)"
+            },
+
+            ticks: {
+              color: "#667085",
+              font: {
+                weight: "600"
+              }
+            }
+
+          },
+
+          y: {
+
+            beginAtZero: false,
+
+            grid: {
+              color: "rgba(124,58,237,0.07)"
+            },
+
+            ticks: {
+              color: "#667085",
+              font: {
+                weight: "600"
+              }
+            }
+
+          }
+
+        }
+
+      }
+
+    });
+
+  }
+
+</script>
+
+</body>
+</html>

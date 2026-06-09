@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Forecastly | Analytics</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .analytics-card,
+    .analytics-chart-card,
+    .analytics-insights-card {
+      padding: 24px;
+      border-radius: 26px;
+      background: rgba(255,255,255,0.84);
+      border: 1px solid rgba(124,58,237,0.13);
+      box-shadow: 0 22px 55px rgba(124,58,237,0.08);
+    }
+
+    .analytics-card p {
+      color: #667085;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .analytics-card h2 {
+      font-size: 30px;
+      color: #21133f;
+      margin-bottom: 8px;
+    }
+
+    .analytics-card span {
+      color: #7c3aed;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .analytics-main-grid {
+      display: grid;
+      grid-template-columns: 1.3fr 0.7fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .analytics-chart {
+      height: 340px;
+      background: #fbf7ff;
+      border-radius: 22px;
+      padding: 16px;
+      margin-top: 18px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .analytics-chart canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .metric-list {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: #fbf7ff;
+      color: #667085;
+      font-weight: 600;
+    }
+
+    .metric-row b {
+      color: #21133f;
+    }
+
+    .analytics-insights-card {
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, #ffffff, #fbf7ff);
+    }
+
+    .analytics-insights-card h2 {
+      color: #21133f;
+      margin-bottom: 16px;
+    }
+
+    .insight-box {
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: #f5efff;
+      color: #352052;
+      font-weight: 500;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .performance-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .performance-card {
+      padding: 22px;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.84);
+      border: 1px solid rgba(124,58,237,0.13);
+      box-shadow: 0 20px 50px rgba(124,58,237,0.08);
+    }
+
+    .performance-card h3 {
+      color: #21133f;
+      margin-bottom: 10px;
+    }
+
+    .performance-card p {
+      color: #667085;
+      line-height: 1.6;
+    }
+
+    .empty-state {
+      padding: 24px;
+      border-radius: 22px;
+      background: #fbf7ff;
+      border: 1px dashed rgba(124,58,237,0.25);
+      color: #667085;
+      line-height: 1.6;
+    }
+
+    .scenario-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 18px;
+      padding-bottom: 40px;
+    }
+
+    .sidebar {
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: visible;
+    }
+
+    .side-nav {
+      flex: 1;
+    }
+
+    .sidebar-profile {
+      margin-top: auto;
+      padding-bottom: 24px;
+      position: relative;
+      z-index: 1000;
+    }
+
+    .profile-menu {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 78px;
+      top: auto;
+      z-index: 9999;
+    }
+
+    @media (max-width: 1100px) {
+      .analytics-grid,
+      .analytics-main-grid,
+      .performance-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="dashboard">
+
+  <aside class="sidebar">
+    <div class="logo">
+      <img class="logo-image" src="{{ url_for('static', filename='images/logo.png') }}" alt="Forecastly logo">
+    </div>
+
+    <nav class="side-nav">
+      <a href="{{ url_for('dashboard') }}"
+         class="{% if request.endpoint == 'dashboard' %}active{% endif %}">
+        Dashboard
+      </a>
+
+      <a href="{{ url_for('upload_data') }}"
+         class="{% if request.endpoint == 'upload_data' %}active{% endif %}">
+        Upload
+      </a>
+
+      <a href="{{ url_for('library') }}"
+         class="{% if request.endpoint == 'library' %}active{% endif %}">
+        Library
+      </a>
+    </nav>
+
+    <div class="sidebar-profile">
+      <button class="profile-button" type="button" onclick="toggleProfileMenu()">
+        <div class="profile-avatar">
+          {{ user_name[0] if user_name else 'U' }}
+        </div>
+
+        <div class="profile-info">
+          <strong>{{ user_name if user_name else 'User' }}</strong>
+          <span>Free Plan</span>
+        </div>
+
+        <span class="profile-arrow">⌄</span>
+      </button>
+
+      <div class="profile-menu" id="profileMenu">
+        <a href="{{ url_for('account') }}">Account settings</a>
+        <a href="#">Billing</a>
+        <a href="#">Help center</a>
+        <a href="{{ url_for('logout') }}" class="logout-link">Log out</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <header class="topbar">
+      <div>
+        <p class="breadcrumb">Forecastly / Forecast / Analytics</p>
+        <h1>Forecast Analytics</h1>
+      </div>
+
+      <div class="top-actions">
+  <a href="{{ url_for('scenario') }}" class="btn secondary">
+    Back to scenario
+  </a>
+
+  <a href="{{ url_for('export_report') }}" class="btn primary">
+    Export PDF
+  </a>
+  <a href="{{ url_for('export_excel') }}" class="btn secondary">
+  Export Excel
+</a>
+</div>
+    </header>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="notice">
+          <span></span>
+          {{ messages[0] }}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% if analytics %}
+
+    <section class="analytics-grid">
+      <div class="analytics-card">
+        <p>Total Revenue</p>
+        <h2>{{ analytics.total_sales }}</h2>
+        <span>Historical sales volume</span>
+      </div>
+
+      <div class="analytics-card">
+        <p>Average Revenue</p>
+        <h2>{{ analytics.average_sales }}</h2>
+        <span>Average daily performance</span>
+      </div>
+
+      <div class="analytics-card">
+        <p>Growth Rate</p>
+        <h2>{{ analytics.growth_rate }}%</h2>
+        <span>Compared to first period</span>
+      </div>
+
+      <div class="analytics-card">
+        <p>Average Forecast</p>
+        <h2>{{ analytics.average_forecast }}</h2>
+        <span>Expected future demand</span>
+      </div>
+    </section>
+
+    <section class="performance-grid">
+
+  <div class="performance-card">
+    <h3>MAPE</h3>
+
+    <h2 style="margin-bottom:12px; color:#7c3aed;">
+      {{ analytics.mape }}%
+    </h2>
+
+    <p>
+      Mean Absolute Percentage Error shows forecast error percentage.
+      Lower values mean higher forecast quality.
+    </p>
+  </div>
+
+  <div class="performance-card">
+    <h3>RMSE</h3>
+
+    <h2 style="margin-bottom:12px; color:#7c3aed;">
+      {{ analytics.rmse }}
+    </h2>
+
+    <p>
+      Root Mean Squared Error measures average prediction deviation.
+      Lower RMSE indicates more stable forecasting.
+    </p>
+  </div>
+
+  <div class="performance-card">
+    <h3>Accuracy</h3>
+
+    <h2 style="margin-bottom:12px; color:#7c3aed;">
+      {{ analytics.accuracy }}%
+    </h2>
+
+    <p>
+      Forecast accuracy is calculated from MAPE.
+      Higher accuracy means better AI prediction performance.
+    </p>
+  </div>
+
+</section>
+    <section class="analytics-main-grid">
+
+      <div class="analytics-chart-card">
+        <h2>Forecast vs Actual</h2>
+
+        <p style="color:#667085; margin-top:8px;">
+          Visual comparison between historical sales behavior and forecasted values.
+        </p>
+
+        <div class="analytics-chart">
+          <canvas id="analyticsChart"></canvas>
+        </div>
+      </div>
+
+      <div class="analytics-chart-card">
+        <h2>Key Metrics</h2>
+
+        <div class="metric-list">
+          <div class="metric-row">
+            <span>Max Sales</span>
+            <b>{{ analytics.max_sales }}</b>
+          </div>
+
+          <div class="metric-row">
+            <span>Min Sales</span>
+            <b>{{ analytics.min_sales }}</b>
+          </div>
+
+          <div class="metric-row">
+            <span>Moving Average</span>
+            <b>{{ analytics.moving_average }}</b>
+          </div>
+
+          <div class="metric-row">
+            <span>Forecast Quality</span>
+            <b>Good</b>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <section class="analytics-insights-card">
+      <h2>AI Analytics Insights</h2>
+
+      {% if ai_insights %}
+        {% for insight in ai_insights %}
+          <div class="insight-box">
+            ✨ {{ insight }}
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="insight-box">
+          No analytics insights available yet.
+        </div>
+      {% endif %}
+    </section>
+
+    <div class="scenario-actions">
+      <a href="{{ url_for('scenario') }}" class="btn secondary">
+        View scenarios
+      </a>
+
+      <a href="{{ url_for('anomalies_page') }}" class="btn primary">
+        Check anomalies
+      </a>
+    </div>
+
+    {% else %}
+
+    <section class="analytics-chart-card">
+      <div class="empty-state">
+        <h2>No analytics data yet</h2>
+
+        <p>
+          Upload your CSV file and complete forecast configuration first.
+          After that, Forecastly will calculate sales analytics,
+          forecast quality metrics, and AI insights.
+        </p>
+
+        <br>
+
+        <a href="{{ url_for('upload_data') }}" class="btn primary">
+          Upload CSV
+        </a>
+      </div>
+    </section>
+
+    {% endif %}
+
+  </main>
+
+</div>
+
+<script>
+  function toggleProfileMenu() {
+    document.getElementById("profileMenu").classList.toggle("open");
+  }
+
+  const analyticsCanvas = document.getElementById("analyticsChart");
+
+  if (analyticsCanvas) {
+    const chartData = JSON.parse(
+      '{{ chart_data | tojson | safe }}'
+    );
+
+    const ctx = analyticsCanvas.getContext("2d");
+
+    new Chart(ctx, {
+      type: "line",
+
+      data: {
+        labels: chartData.labels || [],
+
+        datasets: [
+          {
+            label: "Actual Sales",
+            data: chartData.actual || [],
+
+            borderColor: "#94a3b8",
+            backgroundColor: "rgba(148,163,184,0.08)",
+
+            fill: true,
+            tension: 0.4,
+            borderWidth: 3,
+
+            pointRadius: 4,
+            pointHoverRadius: 7,
+
+            spanGaps: true
+          },
+
+          {
+            label: "Forecast",
+            data: chartData.forecast || [],
+
+            borderColor: "#7c3aed",
+            backgroundColor: "rgba(124,58,237,0.08)",
+
+            fill: true,
+            tension: 0.4,
+            borderDash: [8, 6],
+            borderWidth: 3,
+
+            pointRadius: 4,
+            pointHoverRadius: 7,
+
+            spanGaps: true
+          }
+        ]
+      },
+
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+
+        interaction: {
+          intersect: false,
+          mode: "index"
+        },
+
+        plugins: {
+          legend: {
+            labels: {
+              color: "#667085",
+              font: {
+                weight: "700"
+              }
+            }
+          },
+
+          tooltip: {
+            backgroundColor: "#21133f",
+            titleColor: "#ffffff",
+            bodyColor: "#ffffff",
+            padding: 12,
+            cornerRadius: 12
+          }
+        },
+
+        scales: {
+          x: {
+            grid: {
+              color: "rgba(124,58,237,0.05)"
+            },
+
+            ticks: {
+              color: "#667085",
+              font: {
+                weight: "600"
+              }
+            }
+          },
+
+          y: {
+            beginAtZero: false,
+
+            grid: {
+              color: "rgba(124,58,237,0.07)"
+            },
+
+            ticks: {
+              color: "#667085",
+              font: {
+                weight: "600"
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+</script>
+
+</body>
+</html>

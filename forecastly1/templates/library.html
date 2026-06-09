@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Forecastly | Library</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  <style>
+    .library-toolbar {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .library-search,
+    .library-filter {
+      height: 48px;
+      border-radius: 16px;
+      border: 1px solid rgba(124, 58, 237, 0.15);
+      background: rgba(255, 255, 255, 0.82);
+      padding: 0 18px;
+      font-weight: 600;
+      color: #667085;
+      box-shadow: 0 12px 30px rgba(124, 58, 237, 0.06);
+    }
+
+    .library-search {
+      flex: 1;
+    }
+
+    .library-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .library-summary-card {
+      padding: 24px;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.82);
+      border: 1px solid rgba(124,58,237,0.13);
+      box-shadow: 0 20px 50px rgba(124,58,237,0.08);
+    }
+
+    .library-summary-card p {
+      color: #667085;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .library-summary-card h2 {
+      font-size: 32px;
+    }
+
+    .library-table-card {
+      border-radius: 26px;
+      overflow-x: auto;
+      background: rgba(255,255,255,0.86);
+      border: 1px solid rgba(124,58,237,0.13);
+      box-shadow: 0 24px 60px rgba(124,58,237,0.10);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 850px;
+    }
+
+    thead {
+      background: #fbf7ff;
+    }
+
+    th, td {
+      padding: 18px 20px;
+      border-bottom: 1px solid rgba(124,58,237,0.08);
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      color: #667085;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: 12px;
+    }
+
+    tr:hover {
+      background: #faf5ff;
+    }
+
+    .report-name {
+      font-weight: 800;
+      color: #111827;
+      margin-bottom: 4px;
+    }
+
+    .report-meta {
+      color: #667085;
+      font-size: 13px;
+    }
+
+    .marketplace-pill {
+      display: inline-flex;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #f5efff;
+      color: #7c3aed;
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .status-pill {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #ecfdf5;
+      color: #059669;
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .status-pill.uploaded {
+      background: #eff6ff;
+      color: #2563eb;
+    }
+
+    .status-pill.configured {
+      background: #ecfdf5;
+      color: #059669;
+    }
+
+    .table-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .table-actions form {
+      margin: 0;
+    }
+
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f5efff;
+      color: #7c3aed;
+      font-size: 16px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .icon-btn:hover {
+      background: linear-gradient(135deg,#7c3aed,#ec4899);
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .icon-btn.delete {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .icon-btn.delete:hover {
+      background: #dc2626;
+      color: white;
+    }
+
+    .library-side-card {
+      margin-top: 24px;
+      padding: 24px;
+      border-radius: 26px;
+      background: linear-gradient(135deg,rgba(124,58,237,0.08),rgba(236,72,153,0.08));
+      border: 1px solid rgba(124,58,237,0.13);
+    }
+
+    .library-side-card h3 {
+      margin-bottom: 8px;
+    }
+
+    .library-side-card p {
+      color: #667085;
+      margin-bottom: 16px;
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .side-nav {
+      flex: 1;
+    }
+
+    .sidebar-profile {
+      position: relative;
+      margin-top: auto;
+    }
+
+    .profile-button {
+      width: 100%;
+      border: 1px solid rgba(124, 58, 237, 0.14);
+      background: rgba(255, 255, 255, 0.82);
+      border-radius: 18px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: 0.25s ease;
+    }
+
+    .profile-button:hover {
+      background: #f5efff;
+    }
+
+    .profile-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7c3aed, #ec4899);
+      color: white;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+    }
+
+    .profile-info {
+      flex: 1;
+      text-align: left;
+    }
+
+    .profile-info strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .profile-info span {
+      font-size: 12px;
+      color: #667085;
+    }
+
+    .profile-arrow {
+      color: #667085;
+    }
+
+    .profile-menu {
+      display: none;
+      position: absolute;
+      left: 0;
+      bottom: 64px;
+      width: 100%;
+      background: white;
+      border: 1px solid rgba(124, 58, 237, 0.14);
+      border-radius: 18px;
+      box-shadow: 0 20px 50px rgba(124, 58, 237, 0.12);
+      padding: 8px;
+    }
+
+    .profile-menu.open {
+      display: block;
+    }
+
+    .profile-menu a {
+      display: block;
+      padding: 12px 14px;
+      border-radius: 12px;
+      color: #111827;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .profile-menu a:hover {
+      background: #f5efff;
+      color: #7c3aed;
+    }
+
+    .profile-menu .logout-link {
+      color: #dc2626;
+    }
+
+    .ai-bot {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 999;
+    }
+
+    .bot-button {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      background: linear-gradient(135deg, #7c3aed, #ec4899);
+      color: white;
+      box-shadow: 0 20px 40px rgba(236, 72, 153, 0.4);
+      transition: 0.25s;
+    }
+
+    .bot-button:hover {
+      transform: scale(1.1);
+    }
+
+    .bot-window {
+      display: none;
+      width: 320px;
+      height: 420px;
+      border-radius: 24px;
+      overflow: hidden;
+      background: white;
+      border: 1px solid rgba(124, 58, 237, 0.15);
+      box-shadow: 0 30px 70px rgba(124, 58, 237, 0.2);
+      margin-bottom: 12px;
+    }
+
+    .bot-window.open {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .bot-header {
+      background: linear-gradient(135deg, #7c3aed, #ec4899);
+      color: white;
+      padding: 14px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .bot-header span {
+      cursor: pointer;
+    }
+
+    .bot-messages {
+      flex: 1;
+      padding: 14px;
+      overflow-y: auto;
+      font-size: 14px;
+    }
+
+    .bot-message {
+      background: #f5efff;
+      padding: 10px 14px;
+      border-radius: 14px;
+      margin-bottom: 10px;
+      max-width: 80%;
+    }
+
+    .user-message {
+      background: #7c3aed;
+      color: white;
+      margin-left: auto;
+    }
+
+    .bot-input {
+      display: flex;
+      border-top: 1px solid #eee;
+    }
+
+    .bot-input input {
+      flex: 1;
+      border: none;
+      padding: 12px;
+      outline: none;
+    }
+
+    .bot-input button {
+      border: none;
+      background: #7c3aed;
+      color: white;
+      padding: 0 16px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+      .library-toolbar {
+        flex-direction: column;
+      }
+
+      .library-summary {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="dashboard">
+
+  <aside class="sidebar">
+    <div class="logo">
+      <img class="logo-image" src="{{ url_for('static', filename='images/logo.png') }}" alt="Forecastly logo">
+    </div>
+
+    <nav class="side-nav">
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('upload_data') }}">Upload</a>
+      <a href="{{ url_for('library') }}" class="active">Library</a>
+    </nav>
+
+    <div class="sidebar-profile">
+      <button class="profile-button" type="button" onclick="toggleProfileMenu()">
+        <div class="profile-avatar">
+          {{ user_name[0] if user_name else 'U' }}
+        </div>
+
+        <div class="profile-info">
+          <strong>{{ user_name if user_name else 'User' }}</strong>
+          <span>Free Plan</span>
+        </div>
+
+        <span class="profile-arrow">⌄</span>
+      </button>
+
+      <div class="profile-menu" id="profileMenu">
+        <a href="{{ url_for('account') }}">Account settings</a>
+        <a href="#">Billing</a>
+        <a href="#">Help center</a>
+        <a href="{{ url_for('logout') }}" class="logout-link">Log out</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <header class="topbar">
+      <div>
+        <p class="breadcrumb">Forecastly / Data / Library</p>
+        <h1>Report Library</h1>
+      </div>
+
+      <div class="top-actions">
+        <a href="{{ url_for('upload_data') }}" class="btn primary">+ New Report</a>
+      </div>
+    </header>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="notice">
+          <span></span>
+          {{ messages[0] }}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <section class="library-toolbar">
+      <input id="librarySearch" class="library-search" type="text" placeholder="Search reports or files...">
+
+      <select id="libraryFilter" class="library-filter">
+        <option value="all">All Statuses</option>
+        <option value="uploaded">Uploaded</option>
+        <option value="configured">Configured</option>
+      </select>
+    </section>
+
+    <section class="library-summary">
+      <div class="library-summary-card">
+        <p>Total Reports</p>
+        <h2>{{ uploaded_files|length }}</h2>
+      </div>
+
+      <div class="library-summary-card">
+        <p>Total Rows</p>
+        <h2>{{ total_rows if total_rows else 0 }}</h2>
+      </div>
+
+      <div class="library-summary-card">
+        <p>Storage Type</p>
+        <h2>CSV</h2>
+      </div>
+    </section>
+
+    {% if uploaded_files %}
+
+    <section class="library-table-card">
+  <table>
+    <thead>
+      <tr>
+        <th>Report Name</th>
+        <th>Date Uploaded</th>
+        <th>Rows</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+
+    <tbody id="libraryTableBody">
+      {% for file in uploaded_files %}
+      <tr data-name="{{ file.original_filename|lower }}" data-status="{{ file.status|lower }}">
+        <td>
+          <div class="report-name">{{ file.original_filename }}</div>
+          <div class="report-meta">File ID: #{{ file.id }}</div>
+        </td>
+
+        <td>{{ file.uploaded_at.strftime('%Y-%m-%d %H:%M') }}</td>
+
+        <td>{{ file.rows_count if file.rows_count else 0 }}</td>
+
+        <td>
+          <span class="status-pill {{ file.status|lower }}">
+            {{ file.status }}
+          </span>
+        </td>
+
+        <td>
+          <div class="table-actions">
+
+            <a href="{{ url_for('view_file', file_id=file.id) }}" class="icon-btn" title="View report">
+              👁
+            </a>
+
+            <a href="{{ url_for('export_report') }}" class="icon-btn" title="Download Excel report">
+              ⬇️
+            </a>
+
+          
+
+            <form action="{{ url_for('delete_file', file_id=file.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this report?');">
+              <button type="submit" class="icon-btn delete" title="Delete report">
+                🗑
+              </button>
+            </form>
+
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+    <div class="library-side-card">
+      <h3>Forecast Preview</h3>
+      <p>Open any report to view scenario analysis, forecast curves, analytics, and AI-generated insights.</p>
+      <a href="{{ url_for('scenario') }}" class="btn primary">Open latest forecast</a>
+    </div>
+
+    {% else %}
+
+    <div class="empty-state">
+      <h2>No reports yet</h2>
+      <p>Upload your first CSV file to create a forecast library.</p>
+      <a href="{{ url_for('upload_data') }}" class="btn primary">Upload data</a>
+    </div>
+
+    {% endif %}
+
+  </main>
+
+</div>
+
+<div class="ai-bot">
+  <button class="bot-button" onclick="toggleBot()">💬</button>
+
+  <div class="bot-window" id="botWindow">
+
+    <div class="bot-header">
+      <h3>Forecastly AI</h3>
+      <span onclick="toggleBot()">✕</span>
+    </div>
+
+    <div class="bot-messages" id="botMessages">
+      <div class="bot-message">Hi 👋 How can I help you?</div>
+    </div>
+
+    <div class="bot-input">
+      <input type="text" id="botInput" placeholder="Ask something...">
+      <button onclick="sendMessage()">→</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function toggleProfileMenu() {
+    const menu = document.getElementById("profileMenu");
+    if (menu) {
+      menu.classList.toggle("open");
+    }
+  }
+
+  function toggleBot() {
+    const bot = document.getElementById("botWindow");
+    if (bot) {
+      bot.classList.toggle("open");
+    }
+  }
+
+  function filterLibrary() {
+    const searchInput = document.getElementById("librarySearch");
+    const filterInput = document.getElementById("libraryFilter");
+    const rows = document.querySelectorAll("#libraryTableBody tr");
+
+    const searchValue = searchInput.value.toLowerCase();
+    const statusValue = filterInput.value;
+
+    rows.forEach(row => {
+      const name = row.dataset.name || "";
+      const status = row.dataset.status || "";
+
+      const matchesSearch = name.includes(searchValue);
+      const matchesStatus = statusValue === "all" || status === statusValue;
+
+      row.style.display = matchesSearch && matchesStatus ? "" : "none";
+    });
+  }
+
+  const search = document.getElementById("librarySearch");
+  const filter = document.getElementById("libraryFilter");
+
+  if (search) {
+    search.addEventListener("input", filterLibrary);
+  }
+
+  if (filter) {
+    filter.addEventListener("change", filterLibrary);
+  }
+
+  function addMessage(text, isUser = false) {
+    const messages = document.getElementById("botMessages");
+
+    const msg = document.createElement("div");
+    msg.className = "bot-message";
+
+    if (isUser) {
+      msg.classList.add("user-message");
+    }
+
+    msg.textContent = text;
+    messages.appendChild(msg);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById("botInput");
+    const messages = document.getElementById("botMessages");
+
+    if (!input.value.trim()) return;
+
+    const userText = input.value.trim();
+
+    addMessage(userText, true);
+    input.value = "";
+
+    addMessage("Thinking...");
+
+    try {
+      const response = await fetch("/ai-chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          message: userText,
+          page: "library"
+        })
+      });
+
+      const data = await response.json();
+
+      messages.lastChild.remove();
+
+      addMessage(data.reply || "Sorry, I could not get a response.");
+    } catch (error) {
+      messages.lastChild.remove();
+      addMessage("Something went wrong. Please try again.");
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const input = document.getElementById("botInput");
+
+    if (input) {
+      input.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          sendMessage();
+        }
+      });
+    }
+  });
+</script>
+
+</body>
+</html>
