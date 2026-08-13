@@ -139,7 +139,9 @@ python app.py
 
 ## Author
 
-**Aizere Sabyr**
+Aizere Sabyr
+Lashyn Serikkyzy
+Symbat Karabayeva
 
 International Information Technology University (IITU)
 
